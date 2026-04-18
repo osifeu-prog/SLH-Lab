@@ -1,27 +1,37 @@
 ﻿using namespace System.Net
 using namespace System.IO
 
-# כתובת מקומית  רק מהמחשב עצמו
+# הגדרות אבטחה
+$SECRET_TOKEN = "SLH_SECURE_TOKEN_2026"  # שנה לטוקן חזק
 $listener = New-Object HttpListener
 $listener.Prefixes.Add("http://localhost:8080/")
 $listener.Start()
-Write-Host "🚀 Command Listener active on http://localhost:8080/command" -ForegroundColor Cyan
-Write-Host "   Dashboard ישלח פקודות לכתובת זו." -ForegroundColor Yellow
+Write-Host "🔒 Command Listener active on http://localhost:8080/command (Secure Mode)" -ForegroundColor Cyan
+Write-Host "   Token required: X-SLH-Token header" -ForegroundColor Yellow
 
 while ($listener.IsListening) {
     $context = $listener.GetContext()
     $request = $context.Request
     $response = $context.Response
     
+    # בדיקת Token
+    $authHeader = $request.Headers["X-SLH-Token"]
+    if ($authHeader -ne $SECRET_TOKEN) {
+        $response.StatusCode = 401
+        $errorMsg = @{ error = "Unauthorized" } | ConvertTo-Json
+        $buffer = [Text.Encoding]::UTF8.GetBytes($errorMsg)
+        $response.OutputStream.Write($buffer, 0, $buffer.Length)
+        $response.Close()
+        continue
+    }
+    
     if ($request.HttpMethod -eq "POST" -and $request.Url.AbsolutePath -eq "/command") {
-        # קריאת גוף הבקשה (JSON)
         $reader = New-Object StreamReader($request.InputStream)
         $body = $reader.ReadToEnd()
         $json = $body | ConvertFrom-Json
         $command = $json.command
         
-        # הרצת הפקודה (מוגבלת לרשימה מותרת  אבטחה)
-        $allowedCommands = @("systeminfo", "docker ps", "dir", "echo", "whoami", "Get-Process", "Get-Service")
+        $allowedCommands = @("systeminfo", "docker ps", "dir", "echo", "whoami", "Get-Process", "Get-Service", "python")
         $safe = $false
         foreach ($allowed in $allowedCommands) {
             if ($command -like "$allowed*") {
@@ -34,7 +44,6 @@ while ($listener.IsListening) {
             $output = "⚠️ פקודה לא מורשית. מותרות: $($allowedCommands -join ', ')"
         } else {
             try {
-                # הרצת הפקודה ב-PowerShell
                 $output = & powershell.exe -Command $command 2>&1 | Out-String
                 if (-not $output) { $output = "✅ פקודה בוצעה (אין פלט)" }
             } catch {
@@ -42,7 +51,6 @@ while ($listener.IsListening) {
             }
         }
         
-        # שליחת תשובה חזרה
         $responseContent = @{ output = $output } | ConvertTo-Json
         $buffer = [Text.Encoding]::UTF8.GetBytes($responseContent)
         $response.ContentType = "application/json"

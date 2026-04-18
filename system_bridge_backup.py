@@ -3,12 +3,12 @@ import json
 import time
 import requests
 import os
-import docker
 
+# ===== הגדרות =====
 OUTPUT_PATH = r"D:\AISITE\system_stats.json"
-BOT_TOKEN = "YOUR_BOT_TOKEN"
-CHAT_ID = "YOUR_CHAT_ID"
-NODE_THRESHOLD = 23
+BOT_TOKEN = "YOUR_BOT_TOKEN"      # החלף בטוקן אמיתי
+CHAT_ID = "YOUR_CHAT_ID"          # החלף ב-CHAT_ID אמיתי
+NODE_THRESHOLD = 23               # כמה Nodes אמורים להיות פעילים
 
 def send_telegram_alert(message):
     if BOT_TOKEN == "YOUR_BOT_TOKEN" or CHAT_ID == "YOUR_CHAT_ID":
@@ -20,53 +20,37 @@ def send_telegram_alert(message):
     except Exception as e:
         print(f"Telegram send failed: {e}")
 
-def get_top_container():
-    """מזהה את הקונטיינר שצורך הכי הרבה CPU"""
-    try:
-        client = docker.from_env()
-        containers = client.containers.list()
-        top_name = "N/A"
-        max_cpu = 0
-        for container in containers:
-            stats = container.stats(stream=False)
-            cpu_delta = stats['cpu_stats']['cpu_usage']['total_usage'] - stats['precpu_stats']['cpu_usage']['total_usage']
-            if cpu_delta > max_cpu:
-                max_cpu = cpu_delta
-                top_name = container.name
-        return top_name
-    except Exception as e:
-        print(f"Top consumer detection failed: {e}")
-        return "N/A"
-
 def get_system_metrics():
+    # נתוני מערכת בסיסיים
     cpu_usage = psutil.cpu_percent(interval=1)
     memory = psutil.virtual_memory().percent
     disk = psutil.disk_usage('D:\\').percent
-    top_container = get_top_container()
-    
-    # Docker stats
+
+    # נתוני Docker (עם הגנה מפני שגיאות)
     active_nodes = 0
     total_nodes = 0
     try:
-        client = docker.from_env()
-        containers = client.containers.list(all=True)
+        import docker
+        docker_client = docker.from_env()
+        containers = docker_client.containers.list(all=True)
         total_nodes = len(containers)
         active_nodes = len([c for c in containers if c.status == 'running'])
     except Exception as e:
         print(f"Docker not available: {e}")
+        # אם Docker לא מותקן, נשתמש בערכי ברירת מחדל (למשל 23 Nodes מדומים)
         total_nodes = 23
-        active_nodes = 23
-    
+        active_nodes = 23  # נניח שהכל בסדר
+
+    # בדיקת תקינות Nodes  שליחת התראה אם חסרים
     if active_nodes < NODE_THRESHOLD:
         send_telegram_alert(f"Node failure! Active: {active_nodes}/{NODE_THRESHOLD}")
-    
+
     metrics = {
         "status": "online",
         "last_update": time.strftime("%Y-%m-%d %H:%M:%S"),
         "cpu": cpu_usage,
         "memory": memory,
         "disk": disk,
-        "top_consumer": top_container,
         "docker_nodes": {
             "total": total_nodes,
             "active": active_nodes
@@ -75,7 +59,7 @@ def get_system_metrics():
     return metrics
 
 def main():
-    print("🚀 SLH Bridge Active. Monitoring system and Docker (Top Consumer)...")
+    print("🚀 SLH Bridge Active. Monitoring system and Docker...")
     while True:
         try:
             stats = get_system_metrics()
@@ -83,7 +67,7 @@ def main():
                 json.dump(stats, f, indent=2)
         except Exception as e:
             print(f"❌ Bridge error: {e}")
-        time.sleep(10)
+        time.sleep(10)   # עדכון כל 10 שניות
 
 if __name__ == "__main__":
     main()
