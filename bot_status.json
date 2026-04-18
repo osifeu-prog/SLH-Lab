@@ -2,41 +2,41 @@
   {
     "name": "WALLET_BOT",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "ACADEMY_BOT",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "CRM_BOT",
     "status": "IDLE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "TAMAGOTCHI",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "ECOM_BOT",
-    "status": "IDLE",
-    "last_ping": "21:07:20"
+    "status": "ACTIVE",
+    "last_ping": "21:10:21"
   },
   {
     "name": "NFT_GEN",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "INVENTORY",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   },
   {
     "name": "CORE_OS",
     "status": "ACTIVE",
-    "last_ping": "21:07:20"
+    "last_ping": "21:10:21"
   }
 ]
