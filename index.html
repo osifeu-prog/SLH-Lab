@@ -2,20 +2,69 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLH | Digital Lab</title>
+    <title>SLH | COMMAND CENTER</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { background: #050505; color: #00f2ff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; overflow: hidden; }
-        .card { border: 1px solid #00f2ff; padding: 2rem; border-radius: 15px; text-align: center; box-shadow: 0 0 20px #00f2ff; background: rgba(0,0,0,0.8); }
-        h1 { letter-spacing: 5px; text-transform: uppercase; }
-        .status { color: #00ff88; font-weight: bold; margin-top: 10px; }
+        :root { --neon: #00f2ff; --bg: #0a0a0a; --card: #151515; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
+        nav { width: 220px; background: #000; border-left: 1px solid #333; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        nav a { color: #888; text-decoration: none; padding: 12px; border-radius: 5px; transition: 0.3s; border: 1px solid transparent; }
+        nav a:hover, nav a.active { background: rgba(0, 242, 255, 0.1); color: var(--neon); border-color: var(--neon); }
+        main { flex: 1; padding: 30px; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .node { background: var(--card); border: 1px solid #222; padding: 10px; text-align: center; font-size: 0.7rem; border-radius: 4px; border-top: 2px solid #333; }
+        .status-on { color: #00ff88; font-weight: bold; }
+        .panel { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        #log-container { font-family: 'Courier New', monospace; font-size: 0.85rem; height: 180px; overflow: hidden; color: #00f2ff; line-height: 1.4; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>SLH SPARK</h1>
-        <p>System Architect & Automation Lab</p>
-        <div class="status">● SYSTEM ONLINE</div>
-    </div>
+    <nav>
+        <h2 style="color:var(--neon); letter-spacing: 2px;">SLH OS</h2>
+        <a href="index.html" class="active">📊 Dashboard</a>
+        <a href="agents.html">🤖 Agents Matrix</a>
+        <a href="prompts.html">📜 Master Prompts</a>
+        <hr style="border: 0; border-top: 1px solid #222; width: 100%;">
+        <a href="https://github.com/osifeu-prog/SLH-Lab" target="_blank">🛠 GitHub Repo</a>
+    </nav>
+    <main>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h1 style="margin:0;">SYSTEM OVERVIEW</h1>
+            <div id="clock" style="color:var(--neon); font-family:monospace; font-size:1.2rem;"></div>
+        </div>
+        
+        <div class="grid" id="nodeGrid"></div>
+
+        <div style="display: flex; gap: 20px;">
+            <div class="panel" style="flex: 2;">
+                <h3 style="margin-top:0; color:var(--neon);">Live System Logs</h3>
+                <div id="log-container"></div>
+            </div>
+            <div class="panel" style="flex: 1; text-align:center;">
+                <h3 style="margin-top:0;">Resource Load</h3>
+                <canvas id="loadChart"></canvas>
+            </div>
+        </div>
+    </main>
+    <script>
+        const grid = document.getElementById('nodeGrid');
+        for(let i=1; i<=23; i++) {
+            grid.innerHTML += <div class="node">NODE- + (i<10?'0'+i:i) + <br><span class="status-on">● ONLINE</span></div>;
+        }
+        const logs = ["Initializing Docker...", "Syncing SLH-Lab", "Agent Gemini: Active", "ESP32: Connected", "Node-07: Optimized", "Security Scan: Clear"];
+        const logBox = document.getElementById('log-container');
+        setInterval(() => {
+            const p = document.createElement('div');
+            p.innerHTML = <span style="color:#666">[]</span> >  + logs[Math.floor(Math.random()*logs.length)];
+            logBox.prepend(p);
+            if(logBox.childNodes.length > 10) logBox.lastChild.remove();
+        }, 2500);
+        new Chart(document.getElementById('loadChart'), {
+            type: 'doughnut',
+            data: { datasets: [{ data: [78, 22], backgroundColor: ['#00f2ff', '#222'], borderWidth: 0 }] },
+            options: { cutout: '80%' }
+        });
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString('he-IL'); }, 1000);
+    </script>
 </body>
 </html>
