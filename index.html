@@ -100,5 +100,31 @@
             row.insertCell(2).innerHTML = item.status;
         });
     </script>
+        // טעינת סטטוס בוטים מקובץ JSON
+        function loadBotStatus() {
+            fetch('bot_status.json')
+                .then(response => response.json())
+                .then(data => {
+                    const botGrid = document.querySelector('#bot-grid');
+                    if (botGrid) {
+                        botGrid.innerHTML = '';
+                        data.forEach(bot => {
+                            const statusColor = bot.status === 'ACTIVE' ? '#00ff88' : '#666';
+                            const statusText = bot.status === 'ACTIVE' ? '● ACTIVE' : '○ IDLE';
+                            botGrid.innerHTML += `
+                                <div class="node" style="border-color: ${statusColor};">
+                                    ${bot.name}<br>
+                                    <span style="color:${statusColor};">${statusText}</span>
+                                    <div style="font-size:0.6rem;">${bot.last_ping}</div>
+                                </div>
+                            `;
+                        });
+                    }
+                })
+                .catch(err => console.log("No bot status yet"));
+        }
+        setInterval(loadBotStatus, 10000);
+        loadBotStatus();
 </body>
 </html>
+
