@@ -6,6 +6,7 @@ from datetime import datetime
 
 # רשימת הבוטים שלך (שם, token או username)
 BOTS = [
+        {"name": "WEWORK_TEAMVIWER_BOT", "username": "WEWORK_teamviwer_bot"},
     {"name": "WALLET_BOT", "username": "SLH_WalletBot"},
     {"name": "ACADEMY_BOT", "username": "SLH_AcademyBot"},
     {"name": "CRM_BOT", "username": "SLH_CRMBot"},
@@ -45,3 +46,4 @@ if __name__ == "__main__":
     while True:
         update_status_file()
         time.sleep(30)  # כל 30 שניות
+
