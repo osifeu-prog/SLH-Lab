@@ -1,10 +1,10 @@
 {
   "status": "online",
-  "last_update": "2026-04-18 21:36:34",
-  "cpu": 49.5,
-  "memory": 71.4,
+  "last_update": "2026-04-18 21:45:51",
+  "cpu": 12.7,
+  "memory": 71.6,
   "disk": 7.6,
-  "top_consumer": "slh-redis",
+  "top_consumer": "slh-postgres",
   "docker_nodes": {
     "total": 27,
     "active": 23

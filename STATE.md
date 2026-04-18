@@ -1,44 +1,41 @@
-﻿# SLH SPARK SYSTEM  STATE FILE
-**תאריך עדכון:** 2026-04-18 20:50  
-**מצב מערכת:** Operational High-Availability  
+﻿# SLH SPARK SYSTEM  STATE FILE (CLEAN & SYNCED)
+**תאריך עדכון:** 2026-04-18 21:45
+**מצב מערכת:** Operational  All components running
 
-## 📡 תשתית נוכחית
-- **Backend:** Docker עם 23 Nodes (כולם ONLINE)  
-- **Bridge:** `system_bridge.py` רץ, אוסף CPU/RAM/Disk + Docker stats  
-- **Frontend:** GitHub Pages  Dashboard Real-Time  
-- **Watchdog:** `watchdog.ps1` בודק אתר + עדכניות JSON  
-- **Bot Network:** 8 בוטים (ACTIVE: ACADEMY_BOT, ECOM_BOT, NFT_GEN, INVENTORY)  
+## 🟢 רכיבים פעילים כעת
+- system_bridge.py (Top Consumer + Docker stats)
+- payment_bot.py (Telegram Stars, polling mode)
+- command_listener.ps1 (Secure, Token: SLH_SECURE_TOKEN_2026)
 
-## 🗂️ קבצים קריטיים (D:\AISITE)
-| קובץ | תפקיד |
-|------|--------|
-| index.html | Dashboard ראשי |
-| system_bridge.py | איסוף נתונים + התראות טלגרם |
-| bot_pinger.py | סטטוס בוטים מדומה |
-| watchdog.ps1 | ניטור זמינות |
-| deploy.ps1 | העלאה אוטומטית ל‑GitHub |
-| system_stats.json | נתוני מערכת חיים |
-| bot_status.json | סטטוס בוטים |
-| agents.html, prompts.html, tasks.html | ממשקי ניהול |
+## 📊 Dashboard
+- אתר חי: https://osifeu-prog.github.io/SLH-Lab/
+- 23 Nodes, Bot Network (8 bots), Live Logs, Command Terminal
 
-## 🧠 פרוטוקול עבודה (לסוכן הבא)
-1. תמיד לעבוד מ‑`D:\AISITE` ב‑PowerShell.  
-2. אין להשתמש ב‑`cls`  שומרים היסטוריה.  
-3. כל שינוי בקוד  הרץ `.\deploy.ps1`.  
-4. שמות קבצים ב‑HTML  אותיות קטנות.  
+## 🧪 בדיקות אחרונות
+- system_stats.json מתעדכן כל 10 שניות
+- bot_status.json מתעדכן כל 30 שניות
+- command_listener מגיב לפקודות מורשות
+- payment_bot מגיב ל-/start ו-/buy
 
-## 🚀 תוכניות להמשך (לבחירה)
-- **Command Terminal**  תיבת פקודות ב‑Dashboard לשליטה מרחוק.  
-- **Academy Bot**  הפיכת הבוט ה‑IDLE לפעיל.  
-- **Top Consumer**  זיהוי הקונטיינר שצורך הכי הרבה CPU/RAM.  
+## 📁 קבצים חשובים
+- index.html (Dashboard)
+- system_bridge.py, payment_bot.py, command_listener.ps1, watchdog.ps1, deploy.ps1
+- docs/  ארכיטקטורה, SOPs, תוכנית בדיקות, תוכנית שדרוג
+- wiki/  Knowledge Base מסודר
+- agents/  פרופילי סוכנים
 
-## 📌 סטטוס נוכחי
-- CPU: ~86% (משתנה)  
-- RAM: ~67%  
-- Disk: 7.6%  
-- התראות טלגרם: מוכנות (יש להזין BOT_TOKEN/CHAT_ID אמיתיים)  
-- GitHub Pages: `https://osifeu-prog.github.io/SLH-Lab/`  
+## 🔄 איך להפעיל מחדש את הכול
+הרץ: `.\slh-start-all.ps1`
 
-**לסוכן הבא:** קרא את הקובץ הזה והמשך משם.
+## ✅ משימות שהושלמו
+- [x] Bridge עם Top Consumer
+- [x] Command Terminal מאובטח (Token)
+- [x] Payment Bot (aiogram, SQLite, logging)
+- [x] Wiki מסודר
+- [x] תוכנית בדיקות ושדרוג
+- [x] סקריפט הפעלה כולל
 
-
+## 📌 הבא בתור (אופציונלי)
+- Webhook ל-payment_bot (ngrok)
+- Docker Compose לכל הרכיבים
+- מערכת התראות טלגרם אמיתית
