@@ -1,0 +1,50 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SLH | Mission Board</title>
+    <style>
+        body { background: #0a0a0a; color: white; font-family: sans-serif; margin: 0; display: flex; }
+        nav { width: 220px; background: #000; height: 100vh; padding: 20px; border-left: 1px solid #333; }
+        nav a { color: #888; text-decoration: none; display: block; padding: 12px; }
+        main { flex: 1; padding: 40px; }
+        table { width: 100%; border-collapse: collapse; background: #151515; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #333; }
+        .status-pending { color: #ffaa00; }
+        .status-done { color: #00ff88; }
+        .status-progress { color: #00aaff; }
+        button { background: #00f2ff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h2 style="color:#00f2ff;">SLH OS</h2>
+        <a href="index.html">📊 Dashboard</a>
+        <a href="agents.html">🤖 Agents Matrix</a>
+        <a href="prompts.html">📜 Master Prompts</a>
+        <a href="tasks.html" style="color:white; font-weight:bold;">✅ Mission Board</a>
+    </nav>
+    <main>
+        <h1>Mission Board</h1>
+        <table id="tasksTable">
+            <thead><tr><th>משימה</th><th>אחראי</th><th>סטטוס</th><th>פעולה</th></tr></thead>
+            <tbody>
+                <tr><td>בניית לוח בקרה ראשוני</td><td>Gemini</td><td class="status-done">✔ הושלם</td><td></td></tr>
+                <tr><td>הוספת לוגים חיים</td><td>Gemini</td><td class="status-done">✔ הושלם</td><td></td></tr>
+                <tr><td>יצירת דפי סוכנים</td><td>Execution Partner</td><td class="status-done">✔ הושלם</td><td></td></tr>
+                <tr><td>חיבור ל-Telegram Bot</td><td>Watchdog</td><td class="status-pending">⏳ ממתין</td><td><button onclick="updateTask(this)">התחל</button></td></tr>
+            </tbody>
+        </table>
+    </main>
+    <script>
+        function updateTask(btn) {
+            let row = btn.parentElement.parentElement;
+            let statusCell = row.cells[2];
+            statusCell.innerHTML = '<span class="status-progress">🔄 בביצוע</span>';
+            btn.disabled = true;
+            btn.innerText = 'בוצע';
+            setTimeout(() => { statusCell.innerHTML = '<span class="status-done">✔ הושלם</span>'; }, 2000);
+        }
+    </script>
+</body>
+</html>

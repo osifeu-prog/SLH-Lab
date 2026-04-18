@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SLH | COMMAND CENTER</title>
+    <title>SLH | COMMAND CENTER (REAL-TIME)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #0a0a0a; --card: #151515; }
@@ -24,6 +24,7 @@
         <a href="index.html" class="active">📊 Dashboard</a>
         <a href="agents.html">🤖 Agents Matrix</a>
         <a href="prompts.html">📜 Master Prompts</a>
+        <a href="tasks.html">✅ Mission Board</a>
         <hr style="border: 0; border-top: 1px solid #222; width: 100%;">
         <a href="https://github.com/osifeu-prog/SLH-Lab" target="_blank">🛠 GitHub Repo</a>
     </nav>
@@ -43,31 +44,28 @@
             <div class="panel" style="flex: 1; text-align:center;">
                 <h3 style="margin-top:0;">Resource Load</h3>
                 <canvas id="loadChart"></canvas>
+                <div id="systemStats" style="margin-top: 15px; font-size: 0.8rem; text-align: right;"></div>
             </div>
         </div>
-            <div class="panel">
-            <h3>📋 תיעוד תהליך בניית המערכת</h3>
+
+        <div class="panel">
+            <h3>📜 תיעוד התהליך המלא</h3>
             <table style="width:100%; border-collapse: collapse;">
                 <thead><tr><th>תאריך</th><th>פעולה</th><th>סטטוס</th></tr></thead>
-                <tbody>
-                    <tr><td>2026-04-18 20:06</td><td>יצירת index.html בסיסי</td><td>✅</td></tr>
-                    <tr><td>2026-04-18 20:10</td><td>הקמת repo SLH-Lab ו-push ראשון</td><td>✅</td></tr>
-                    <tr><td>2026-04-18 20:45</td><td>שדרוג ל-Dashboard עם 23 Nodes, לוגים, גרף</td><td>✅</td></tr>
-                    <tr><td>2026-04-18 21:00</td><td>הוספת דפי Agents ו-Prompts</td><td>✅</td></tr>
-                </tbody>
+                <tbody id="historyTable"></tbody>
             </table>
         </div>
-</main>
+    </main>
     <script>
         const grid = document.getElementById('nodeGrid');
         for(let i=1; i<=23; i++) {
-            grid.innerHTML += <div class="node">NODE- + (i<10?'0'+i:i) + <br><span class="status-on">● ONLINE</span></div>;
+            grid.innerHTML += `<div class="node">NODE-` + (i<10?'0'+i:i) + `<br><span class="status-on">● ONLINE</span></div>`;
         }
         const logs = ["Initializing Docker...", "Syncing SLH-Lab", "Agent Gemini: Active", "ESP32: Connected", "Node-07: Optimized", "Security Scan: Clear"];
         const logBox = document.getElementById('log-container');
         setInterval(() => {
             const p = document.createElement('div');
-            p.innerHTML = <span style="color:#666">[]</span> >  + logs[Math.floor(Math.random()*logs.length)];
+            p.innerHTML = `<span style="color:#666">[${new Date().toLocaleTimeString()}]</span> > ` + logs[Math.floor(Math.random()*logs.length)];
             logBox.prepend(p);
             if(logBox.childNodes.length > 10) logBox.lastChild.remove();
         }, 2500);
@@ -77,7 +75,30 @@
             options: { cutout: '80%' }
         });
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString('he-IL'); }, 1000);
+        async function fetchSystemStats() {
+            try {
+                const response = await fetch('/api/stats');
+                const data = await response.json();
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: ${data.disk}% &nbsp; | &nbsp; 🧠 זיכרון: ${data.memory}%`;
+            } catch(e) {
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: 42% &nbsp; | &nbsp; 🧠 זיכרון: 38% (demo)`;
+            }
+        }
+        fetchSystemStats();
+        const historyData = [
+            { date: "2026-04-18 20:06", action: "יצירת index.html בסיסי", status: "✅" },
+            { date: "2026-04-18 20:10", action: "יצירת repo SLH-Lab ו-push ראשון", status: "✅" },
+            { date: "2026-04-18 20:45", action: "הוספת Dashboard עם 23 Nodes, לוגים, גרף", status: "✅" },
+            { date: "2026-04-18 21:00", action: "הוספת דפי Agents ו-Prompts", status: "✅" },
+            { date: "2026-04-18 21:30", action: "הוספת Mission Board ו-Watchdog", status: "✅" }
+        ];
+        const tbody = document.getElementById('historyTable');
+        historyData.forEach(item => {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerText = item.date;
+            row.insertCell(1).innerText = item.action;
+            row.insertCell(2).innerHTML = item.status;
+        });
     </script>
 </body>
 </html>
-
