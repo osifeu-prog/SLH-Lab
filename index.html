@@ -33,9 +33,17 @@
             <h1 style="margin:0;">SYSTEM OVERVIEW</h1>
             <div id="clock" style="color:var(--neon); font-family:monospace; font-size:1.2rem;"></div>
         </div>
-        
+
+        <!-- 23 Docker Nodes -->
         <div class="grid" id="nodeGrid"></div>
 
+        <!-- Bot Grid (יופיע מתחת ל-Nodes) -->
+        <div class="panel">
+            <h3 style="color:var(--neon);">🤖 Bot Network (8 Bots)</h3>
+            <div id="bot-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));"></div>
+        </div>
+
+        <!-- לוגים וגרף -->
         <div style="display: flex; gap: 20px;">
             <div class="panel" style="flex: 2;">
                 <h3 style="margin-top:0; color:var(--neon);">Live System Logs</h3>
@@ -44,10 +52,11 @@
             <div class="panel" style="flex: 1; text-align:center;">
                 <h3 style="margin-top:0;">Resource Load</h3>
                 <canvas id="loadChart"></canvas>
-                <div id="systemStats" style="margin-top: 15px; font-size: 0.8rem; text-align: right;"></div>
+                <div id="systemStats" style="margin-top: 15px; font-size: 0.9rem; text-align: center; background: #00000088; padding: 8px; border-radius: 8px;"></div>
             </div>
         </div>
 
+        <!-- היסטוריה -->
         <div class="panel">
             <h3>📜 תיעוד התהליך המלא</h3>
             <table style="width:100%; border-collapse: collapse;">
@@ -56,11 +65,15 @@
             </table>
         </div>
     </main>
+
     <script>
+        // 23 Nodes
         const grid = document.getElementById('nodeGrid');
         for(let i=1; i<=23; i++) {
             grid.innerHTML += `<div class="node">NODE-` + (i<10?'0'+i:i) + `<br><span class="status-on">● ONLINE</span></div>`;
         }
+
+        // לוגים דינמיים (סימולציה)
         const logs = ["Initializing Docker...", "Syncing SLH-Lab", "Agent Gemini: Active", "ESP32: Connected", "Node-07: Optimized", "Security Scan: Clear"];
         const logBox = document.getElementById('log-container');
         setInterval(() => {
@@ -69,40 +82,39 @@
             logBox.prepend(p);
             if(logBox.childNodes.length > 10) logBox.lastChild.remove();
         }, 2500);
-        new Chart(document.getElementById('loadChart'), {
-            type: 'doughnut',
-            data: { datasets: [{ data: [78, 22], backgroundColor: ['#00f2ff', '#222'], borderWidth: 0 }] },
-            options: { cutout: '80%' }
-        });
+
+        // שעון
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString('he-IL'); }, 1000);
+
+        // === 1. טעינת נתוני מערכת מ-system_stats.json ===
+        let resourceChart = null;
         async function fetchSystemStats() {
             try {
-                const response = await fetch('/api/stats');
+                const response = await fetch('system_stats.json?t=' + Date.now());
                 const data = await response.json();
-                document.getElementById('systemStats').innerHTML = `💾 דיסק: ${data.disk}% &nbsp; | &nbsp; 🧠 זיכרון: ${data.memory}%`;
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: ${data.disk}% &nbsp; | &nbsp; 🧠 זיכרון: ${data.memory}% &nbsp; | &nbsp; 🖥️ CPU: ${data.cpu}%<br><span style="font-size:0.7rem;">עודכן: ${data.timestamp}</span>`;
+                if (resourceChart) {
+                    resourceChart.data.datasets[0].data = [data.cpu, 100 - data.cpu];
+                    resourceChart.update();
+                } else {
+                    // יצירת הגרף בפעם הראשונה
+                    const ctx = document.getElementById('loadChart').getContext('2d');
+                    resourceChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: { datasets: [{ data: [data.cpu, 100 - data.cpu], backgroundColor: ['#00f2ff', '#222'], borderWidth: 0 }] },
+                        options: { cutout: '80%', plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
             } catch(e) {
-                document.getElementById('systemStats').innerHTML = `💾 דיסק: 42% &nbsp; | &nbsp; 🧠 זיכרון: 38% (demo)`;
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: --% &nbsp; | &nbsp; 🧠 זיכרון: --% &nbsp; | &nbsp; 🖥️ CPU: --%<br><span style="font-size:0.7rem;">ממתין ל‑system_bridge.py...</span>`;
             }
         }
+        setInterval(fetchSystemStats, 3000);
         fetchSystemStats();
-        const historyData = [
-            { date: "2026-04-18 20:06", action: "יצירת index.html בסיסי", status: "✅" },
-            { date: "2026-04-18 20:10", action: "יצירת repo SLH-Lab ו-push ראשון", status: "✅" },
-            { date: "2026-04-18 20:45", action: "הוספת Dashboard עם 23 Nodes, לוגים, גרף", status: "✅" },
-            { date: "2026-04-18 21:00", action: "הוספת דפי Agents ו-Prompts", status: "✅" },
-            { date: "2026-04-18 21:30", action: "הוספת Mission Board ו-Watchdog", status: "✅" }
-        ];
-        const tbody = document.getElementById('historyTable');
-        historyData.forEach(item => {
-            let row = tbody.insertRow();
-            row.insertCell(0).innerText = item.date;
-            row.insertCell(1).innerText = item.action;
-            row.insertCell(2).innerHTML = item.status;
-        });
-    </script>
-        // טעינת סטטוס בוטים מקובץ JSON
+
+        // === 2. טעינת סטטוס בוטים מ-bot_status.json ===
         function loadBotStatus() {
-            fetch('bot_status.json')
+            fetch('bot_status.json?t=' + Date.now())
                 .then(response => response.json())
                 .then(data => {
                     const botGrid = document.querySelector('#bot-grid');
@@ -121,11 +133,27 @@
                         });
                     }
                 })
-                .catch(err => console.log("No bot status yet"));
+                .catch(err => console.log("No bot status yet", err));
         }
-        setInterval(loadBotStatus, 10000);
+        setInterval(loadBotStatus, 5000);
         loadBotStatus();
+
+        // === 3. היסטוריה (סטטית) ===
+        const historyData = [
+            { date: "2026-04-18 20:06", action: "יצירת index.html בסיסי", status: "✅" },
+            { date: "2026-04-18 20:10", action: "יצירת repo SLH-Lab ו-push ראשון", status: "✅" },
+            { date: "2026-04-18 20:45", action: "הוספת Dashboard עם 23 Nodes, לוגים, גרף", status: "✅" },
+            { date: "2026-04-18 21:00", action: "הוספת דפי Agents ו-Prompts", status: "✅" },
+            { date: "2026-04-18 21:30", action: "הוספת Mission Board ו-Watchdog", status: "✅" },
+            { date: "2026-04-18 20:44", action: "חיבור system_bridge.py (נתונים אמיתיים)", status: "✅" }
+        ];
+        const tbody = document.getElementById('historyTable');
+        historyData.forEach(item => {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerText = item.date;
+            row.insertCell(1).innerText = item.action;
+            row.insertCell(2).innerHTML = item.status;
+        });
+    </script>
 </body>
 </html>
-
-
