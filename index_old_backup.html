@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SLH | COMMAND CENTER</title>
+    <title>SLH | COMMAND CENTER (REAL-TIME)</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root { --neon: #00f2ff; --bg: #0a0a0a; --card: #151515; }
@@ -16,9 +16,6 @@
         .status-on { color: #00ff88; font-weight: bold; }
         .panel { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-top: 20px; }
         #log-container { font-family: 'Courier New', monospace; font-size: 0.85rem; height: 180px; overflow: hidden; color: #00f2ff; line-height: 1.4; }
-        .bot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
-        button { background: #00f2ff; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
-        input { flex:1; padding: 8px; background:#222; color:white; border:1px solid #444; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -29,22 +26,26 @@
         <a href="prompts.html">📜 Master Prompts</a>
         <a href="tasks.html">✅ Mission Board</a>
         <hr style="border: 0; border-top: 1px solid #222; width: 100%;">
-        <a href="https://github.com/osifeu-prog/SLH-Lab" target="_blank">🛠 GitHub Repo</a>
-        <a href="wiki/index.html" target="_blank">📚 Wiki</a>
+        <a href="https://github.com/osifeu-prog/SLH-Lab" target="_blank">🛠 GitHub Repo</a>`n            <a href="wiki/index.md" target="_blank">📚 Wiki</a>
+            <a href="wiki/index.md" target="_blank">📚 Wiki</a>
+            <a href="wiki/index.md" target="_blank">📚 Wiki</a>
     </nav>
     <main>
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
             <h1 style="margin:0;">SYSTEM OVERVIEW</h1>
             <div id="clock" style="color:var(--neon); font-family:monospace; font-size:1.2rem;"></div>
         </div>
+
+        <!-- 23 Docker Nodes -->
         <div class="grid" id="nodeGrid"></div>
-        
-        <!-- Bot Network -->
+
+        <!-- Bot Grid (יופיע מתחת ל-Nodes) -->
         <div class="panel">
             <h3 style="color:var(--neon);">🤖 Bot Network (8 Bots)</h3>
-            <div id="bot-grid" class="bot-grid"></div>
+            <div id="bot-grid" class="grid" style="grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));"></div>
         </div>
-        
+
+        <!-- לוגים וגרף -->
         <div style="display: flex; gap: 20px;">
             <div class="panel" style="flex: 2;">
                 <h3 style="margin-top:0; color:var(--neon);">Live System Logs</h3>
@@ -56,19 +57,27 @@
                 <div id="systemStats" style="margin-top: 15px; font-size: 0.9rem; text-align: center; background: #00000088; padding: 8px; border-radius: 8px;"></div>
             </div>
         </div>
-        
-        <!-- Command Terminal Panel -->
+
+                <!-- Command Terminal Panel -->
         <div class="panel">
             <h3 style="color:var(--neon);">🖥️ Command Terminal (Local)</h3>
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <input type="text" id="cmdInput" placeholder="הקלד פקודה... (למשל: systeminfo, docker ps, dir)">
-                <button id="sendCmd">🚀 הרץ</button>
+                <input type="text" id="cmdInput" placeholder="הקלד פקודה... (למשל: systeminfo, docker ps, dir)" style="flex:1; padding: 8px; background:#222; color:white; border:1px solid #444; border-radius: 4px;">
+                <button id="sendCmd" style="background:#00f2ff; color:#000; border:none; padding: 8px 16px; border-radius: 4px; cursor:pointer;">🚀 הרץ</button>
             </div>
             <div id="cmdResult" style="background:#000; padding: 8px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto; color: #0f0; border-radius: 4px;">תוצאה תופיע כאן...</div>
         </div>
-        
-        <!-- History -->
+<!-- היסטוריה -->
+                <!-- Command Terminal Panel -->
         <div class="panel">
+            <h3 style="color:var(--neon);">🖥️ Command Terminal (Local)</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="cmdInput" placeholder="הקלד פקודה... (למשל: systeminfo, docker ps, dir)" style="flex:1; padding: 8px; background:#222; color:white; border:1px solid #444; border-radius: 4px;">
+                <button id="sendCmd" style="background:#00f2ff; color:#000; border:none; padding: 8px 16px; border-radius: 4px; cursor:pointer;">🚀 הרץ</button>
+            </div>
+            <div id="cmdResult" style="background:#000; padding: 8px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto; color: #0f0; border-radius: 4px;">תוצאה תופיע כאן...</div>
+        </div>
+<div class="panel">
             <h3>📜 תיעוד התהליך המלא</h3>
             <table style="width:100%; border-collapse: collapse;">
                 <thead><tr><th>תאריך</th><th>פעולה</th><th>סטטוס</th></tr></thead>
@@ -76,13 +85,15 @@
             </table>
         </div>
     </main>
+
     <script>
         // 23 Nodes
         const grid = document.getElementById('nodeGrid');
         for(let i=1; i<=23; i++) {
             grid.innerHTML += `<div class="node">NODE-` + (i<10?'0'+i:i) + `<br><span class="status-on">● ONLINE</span></div>`;
         }
-        // Live Logs
+
+        // לוגים דינמיים (סימולציה)
         const logs = ["Initializing Docker...", "Syncing SLH-Lab", "Agent Gemini: Active", "ESP32: Connected", "Node-07: Optimized", "Security Scan: Clear"];
         const logBox = document.getElementById('log-container');
         setInterval(() => {
@@ -91,10 +102,11 @@
             logBox.prepend(p);
             if(logBox.childNodes.length > 10) logBox.lastChild.remove();
         }, 2500);
-        // Clock
+
+        // שעון
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString('he-IL'); }, 1000);
-        
-        // System Stats from system_stats.json
+
+        // === 1. טעינת נתוני מערכת מ-system_stats.json ===
         let resourceChart = null;
         async function fetchSystemStats() {
             try {
@@ -105,6 +117,7 @@
                     resourceChart.data.datasets[0].data = [data.cpu, 100 - data.cpu];
                     resourceChart.update();
                 } else {
+                    // יצירת הגרף בפעם הראשונה
                     const ctx = document.getElementById('loadChart').getContext('2d');
                     resourceChart = new Chart(ctx, {
                         type: 'doughnut',
@@ -118,8 +131,8 @@
         }
         setInterval(fetchSystemStats, 3000);
         fetchSystemStats();
-        
-        // Bot Status from bot_status.json
+
+        // === 2. טעינת סטטוס בוטים מ-bot_status.json ===
         function loadBotStatus() {
             fetch('bot_status.json?t=' + Date.now())
                 .then(response => response.json())
@@ -127,48 +140,25 @@
                     const botGrid = document.querySelector('#bot-grid');
                     if (botGrid) {
                         botGrid.innerHTML = '';
-                        for (const [name, status] of Object.entries(data)) {
-                            if (name !== 'last_check') {
-                                const statusColor = status === 'Active' ? '#00ff88' : '#666';
-                                const statusText = status === 'Active' ? '● ACTIVE' : '○ IDLE';
-                                botGrid.innerHTML += `
-                                    <div class="node" style="border-color: ${statusColor};">
-                                        ${name}<br>
-                                        <span style="color:${statusColor};">${statusText}</span>
-                                        <div style="font-size:0.6rem;">${data.last_check || 'now'}</div>
-                                    </div>
-                                `;
-                            }
-                        }
+                        data.forEach(bot => {
+                            const statusColor = bot.status === 'ACTIVE' ? '#00ff88' : '#666';
+                            const statusText = bot.status === 'ACTIVE' ? '● ACTIVE' : '○ IDLE';
+                            botGrid.innerHTML += `
+                                <div class="node" style="border-color: ${statusColor};">
+                                    ${bot.name}<br>
+                                    <span style="color:${statusColor};">${statusText}</span>
+                                    <div style="font-size:0.6rem;">${bot.last_ping}</div>
+                                </div>
+                            `;
+                        });
                     }
                 })
                 .catch(err => console.log("No bot status yet", err));
         }
         setInterval(loadBotStatus, 5000);
         loadBotStatus();
-        
-        // Command Terminal
-        const sendBtn = document.getElementById('sendCmd');
-        const cmdInput = document.getElementById('cmdInput');
-        const cmdResult = document.getElementById('cmdResult');
-        async function runCommand(cmd) {
-            cmdResult.innerHTML = "⏳ שולח פקודה...";
-            try {
-                const response = await fetch('http://localhost:8080/command', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ command: cmd })
-                });
-                const data = await response.json();
-                cmdResult.innerHTML = `<pre style="margin:0; white-space:pre-wrap;">${data.output || "⚠️ אין פלט"}</pre>`;
-            } catch (err) {
-                cmdResult.innerHTML = `❌ שגיאה: ${err.message}<br>ודא ש‑command_listener.ps1 רץ.`;
-            }
-        }
-        sendBtn.addEventListener('click', () => { const cmd = cmdInput.value.trim(); if (cmd) runCommand(cmd); });
-        cmdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });
-        
-        // History
+
+        // === 3. היסטוריה (סטטית) ===
         const historyData = [
             { date: "2026-04-18 20:06", action: "יצירת index.html בסיסי", status: "✅" },
             { date: "2026-04-18 20:10", action: "יצירת repo SLH-Lab ו-push ראשון", status: "✅" },
@@ -185,5 +175,35 @@
             row.insertCell(2).innerHTML = item.status;
         });
     </script>
+        // Command Terminal - send to local PowerShell listener
+        const sendBtn = document.getElementById('sendCmd');
+        const cmdInput = document.getElementById('cmdInput');
+        const cmdResult = document.getElementById('cmdResult');
+        
+        async function runCommand(cmd) {
+            cmdResult.innerHTML = "⏳ שולח פקודה...";
+            try {
+                const response = await fetch('http://localhost:8080/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const data = await response.json();
+                cmdResult.innerHTML = `<pre style="margin:0; white-space:pre-wrap;">${data.output || "⚠️ אין פלט"}</pre>`;
+            } catch (err) {
+                cmdResult.innerHTML = `❌ שגיאה: ${err.message}<br>ודא ש‑command_listener.ps1 רץ.`;
+            }
+        }
+        
+        sendBtn.addEventListener('click', () => {
+            const cmd = cmdInput.value.trim();
+            if (cmd) runCommand(cmd);
+        });
+        cmdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });
 </body>
 </html>
+
+
+
+
+

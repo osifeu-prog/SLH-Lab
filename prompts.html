@@ -2,12 +2,15 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>SLH | PROMPTS</title>
+    <title>SLH | MASTER PROMPTS</title>
     <style>
         body { background: #0a0a0a; color: white; font-family: sans-serif; margin: 0; display: flex; }
         nav { width: 220px; background: #000; height: 100vh; padding: 20px; border-left: 1px solid #333; }
+        nav a { color: #888; text-decoration: none; display: block; padding: 12px; border-radius: 5px; }
+        nav a:hover { background: rgba(0, 242, 255, 0.1); color: #00f2ff; }
         main { flex: 1; padding: 40px; }
-        pre { background: #000; color: #00ff88; padding: 20px; border: 1px dashed #444; white-space: pre-wrap; }
+        .panel { background: #151515; border: 1px solid #333; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        pre { background: #000; color: #00ff88; padding: 10px; border: 1px dashed #444; }
     </style>
 </head>
 <body>
@@ -16,46 +19,44 @@
         <a href="index.html">📊 Dashboard</a>
         <a href="agents.html">🤖 Agents Matrix</a>
         <a href="prompts.html" style="color:white; font-weight:bold;">📜 Master Prompts</a>
+        <a href="tasks.html">✅ Mission Board</a>
     </nav>
     <main>
         <h1>Master Prompts Table</h1>
-        <h3>פרוטוקול עבודה קבוע:</h3>
-        <pre>
+        <div class="panel">
+            <h3 style="color:#00f2ff;">📋 פרוטוקול עבודה קבוע:</h3>
+            <pre>
 1. תמיד לעבוד מ-PowerShell בספריית D:\AISITE.
 2. אין להשתמש ב-CLS כדי לשמור על תיעוד לסוכנים אחרים.
 3. כל שינוי בקוד חייב להסתיים בהרצת .\deploy.ps1.
 4. שמות קבצים ב-HTML תמיד באותיות קטנות (lowercase).
-        </pre>
+            </pre>
+        </div>
+        <div class="panel" style="border-left: 5px solid #00ff88;">
+            <p><span style="color:#00ff88;">[21:03:56]</span> <strong>ACTION:</strong> Academy Bot Reactivated.</p>
+            <p><strong>Status:</strong> Syncing lessons to Docker Nodes...</p>
+        </div>
+        <div class="panel" style="border-left: 5px solid #ffaa00;">
+            <h3 style="color:#ffaa00;">🤖 Academy Bot  Telegram Payments</h3>
+            <p><strong>Status:</strong> Planning Phase  Digital Products via Telegram Stars</p>
+            <p><strong>Next Steps:</strong> Setup database, implement aiogram handlers, configure webhook</p>
+            <pre>BOT_TOKEN = env.get("WEWORK_BOT_TOKEN")</pre>
+        </div>
+        <div class="panel" style="border-left: 5px solid #00f2ff;">
+            <h3 style="color:#00f2ff;">💳 WEWORK_teamviwer_bot  Payment Integration</h3>
+            <p><strong>Status:</strong> Active (polling mode)</p>
+            <p><strong>Commands:</strong> /start, /buy (Telegram Stars, 10 XTR)</p>
+            <p><strong>Next steps:</strong> Webhook setup, database, product catalog, admin panel</p>
+            <pre>python D:\AISITE\payment_bot.py</pre>
+        </div>
+        <div class="panel" style="border-left: 5px solid #00f2ff;">
+            <h3 style="color:#00f2ff;">💳 WEWORK_teamviwer_bot  הוראות הפעלה</h3>
+            <p><strong>סטטוס:</strong> פעיל (polling mode)</p>
+            <p><strong>פקודות:</strong> /start, /buy (10 Telegram Stars)</p>
+            <p><strong>הרצה ידנית:</strong> python D:\AISITE\payment_bot.py</p>
+            <p><strong>הרצה בשקט ברקע:</strong> .\start_payment_bot.ps1</p>
+            <p><strong>הערה:</strong> לתשלום אמיתי יש לאשר מונטיזציה מול @BotFather ולהגדיר webhook.</p>
+        </div>
     </main>
 </body>
 </html>
-<div class="panel" style="border-left: 5px solid #00ff88;">
-    <p><span style="color:#00ff88;">[21:03:56]</span> <strong>ACTION:</strong> Academy Bot Reactivated.</p>
-    <p><strong>Status:</strong> Syncing lessons to Docker Nodes...</p>
-</div>
-<div class="panel" style="border-left: 5px solid #00ff88;">
-    <p><span style="color:#00ff88;">[21:04:03]</span> <strong>ACTION:</strong> Academy Bot Reactivated.</p>
-    <p><strong>Status:</strong> Syncing lessons to Docker Nodes...</p>
-</div>
-<div class="panel" style="border-left: 5px solid #ffaa00;">
-    <h3 style="color:#ffaa00;">🤖 Academy Bot  Telegram Payments</h3>
-    <p><strong>Status:</strong> Planning Phase  Digital Products via Telegram Stars</p>
-    <p><strong>Next Steps:</strong> Setup database, implement aiogram handlers, configure webhook</p>
-    <pre style="background:#000; color:#00ff88; padding:10px;">BOT_TOKEN = env.get("WEWORK_BOT_TOKEN")</pre>
-</div>
-<div class="panel" style="border-left: 5px solid #00f2ff; margin-top: 15px;">
-    <h3 style="color:#00f2ff;">💳 WEWORK_teamviwer_bot  Payment Integration</h3>
-    <p><strong>Status:</strong> Active (polling mode)</p>
-    <p><strong>Commands:</strong> /start, /buy (Telegram Stars, 10 XTR)</p>
-    <p><strong>Next steps:</strong> Webhook setup, database, product catalog, admin panel</p>
-    <pre style="background:#000; color:#0f0;">python D:\AISITE\payment_bot.py</pre>
-</div>
-<div class="panel" style="border-left: 5px solid #00f2ff; margin-top: 15px;">
-    <h3 style="color:#00f2ff;">💳 WEWORK_teamviwer_bot  הוראות הפעלה</h3>
-    <p><strong>סטטוס:</strong> פעיל (polling mode)</p>
-    <p><strong>פקודות:</strong> <code>/start</code>, <code>/buy</code> (10 Telegram Stars)</p>
-    <p><strong>הרצה ידנית:</strong> <code>python D:\AISITE\payment_bot.py</code></p>
-    <p><strong>הרצה בשקט ברקע:</strong> <code>.\start_payment_bot.ps1</code></p>
-    <p><strong>הערה:</strong> לתשלום אמיתי יש לאשר מונטיזציה מול @BotFather ולהגדיר webhook.</p>
-</div>
-
