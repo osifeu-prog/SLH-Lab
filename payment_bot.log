@@ -25,3 +25,11 @@
 2026-04-19 11:42:37,989 - aiogram.event - INFO - Update id=969084675 is handled. Duration 187 ms by bot id=8741101048
 2026-04-19 11:42:39,250 - __main__ - INFO - Invoice sent to user 224223270
 2026-04-19 11:42:39,251 - aiogram.event - INFO - Update id=969084676 is handled. Duration 157 ms by bot id=8741101048
+2026-04-19 11:55:58,597 - __main__ - INFO - User 224223270 started bot
+2026-04-19 11:55:58,600 - aiogram.event - INFO - Update id=969084677 is handled. Duration 296 ms by bot id=8741101048
+2026-04-19 11:57:01,473 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by setWebhook request
+2026-04-19 11:57:01,473 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8741101048)
+2026-04-19 11:57:12,650 - aiogram.dispatcher - INFO - Connection established (tryings = 1, bot id = 8741101048)
+2026-04-19 12:00:30,444 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by setWebhook request
+2026-04-19 12:00:30,444 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8741101048)
+2026-04-19 12:00:41,523 - aiogram.dispatcher - INFO - Connection established (tryings = 1, bot id = 8741101048)
