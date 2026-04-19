@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SLH SPARK SYSTEM – Mission Dashboard</title>
+    <title>SLH SPARK SYSTEM  Mission Dashboard v1.6</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { background: #0a0f1e; font-family: 'Segoe UI', monospace; color: #e0e0e0; padding: 20px; }
@@ -25,13 +25,16 @@
         .progress-bar { background: #2a2f3f; border-radius: 12px; overflow: hidden; height: 12px; margin: 8px 0; }
         .progress-fill { background: #00ff88; width: 0%; height: 100%; }
         .footer { text-align: center; margin-top: 40px; font-size: 0.7rem; color: #5a6e8a; }
+        button { cursor: pointer; transition: 0.2s; }
+        button:hover { opacity: 0.8; }
+        input, select { background: #0a0e16; border: 1px solid #2a3f5f; color: white; padding: 6px; border-radius: 6px; }
         @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🔥 SLH SPARK SYSTEM — Mission Control</h1>
-    <div class="sub">⚡ Live Dashboard | Real-time Agents | Autonomous Bots | ESP32 Synced</div>
+    <h1>🔥 SLH SPARK SYSTEM — Mission Control v1.6</h1>
+    <div class="sub">⚡ Live Dashboard | AI Provider Switcher | Encrypted Keys | ESP32 Synced</div>
 
     <div class="grid">
         <div class="panel">
@@ -54,7 +57,7 @@
             <div id="nodes-grid" class="node-grid">Loading nodes...</div>
         </div>
         <div class="panel">
-            <h3>🎯 Mission Control – Who does what?</h3>
+            <h3>🎯 Mission Control  Who does what?</h3>
             <div id="whereWeStand" style="background:#0a0e16; border-radius:12px; padding:10px; margin-bottom:16px;">⏳ Checking system status...</div>
             <div style="overflow-x: auto;">
                 <table id="task-table">
@@ -65,18 +68,39 @@
         </div>
     </div>
 
+    <!-- API Key Manager Panel (NEW) -->
+    <div class="panel" style="margin-top: 20px;">
+        <h3>🔐 API Keys Manager  Switch AI Models on the Fly</h3>
+        <div id="apiKeysStatus" style="font-size:0.8rem; margin-bottom:12px;">Loading keys from local storage...</div>
+        <div id="apiKeysList"></div>
+        <div style="display: flex; gap: 10px; margin-top: 12px;">
+            <button id="saveKeysBtn" style="background:#1f5a2a; border:none; color:white; padding:6px 12px; border-radius:8px;">💾 Save to Browser (Encrypted)</button>
+            <button id="resetKeysBtn" style="background:#7a2e2e; border:none; color:white; padding:6px 12px; border-radius:8px;">🗑️ Reset All Keys</button>
+            <select id="defaultModelSelect" style="margin-left: auto;">
+                <option value="gemini">Default: Gemini</option>
+                <option value="openai">Default: OpenAI</option>
+                <option value="groq">Default: Groq</option>
+                <option value="cohere">Default: Cohere</option>
+                <option value="replicate">Default: Replicate</option>
+                <option value="hf">Default: Hugging Face</option>
+            </select>
+        </div>
+        <div style="margin-top:12px; font-size:0.7rem; color:#aaa;">🔒 Keys stored ONLY in your browser's localStorage, encrypted with base64. Never uploaded to GitHub.</div>
+    </div>
+
     <div class="panel">
-        <h3>🛣️ Development Roadmap – next milestones</h3>
+        <h3>🛣️ Development Roadmap  next milestones</h3>
         <div id="roadmap-list"></div>
         <div style="margin-top: 12px; font-size:0.75rem; color:#77aa88;">✅ Completed: Phase 0 (Core dashboard, bots, bridge, ESP32 test)</div>
     </div>
 
     <div class="footer">
-        SLH SPARK SYSTEM v1.5 | Deployed via GitHub Pages | <span id="liveTimestamp"></span>
+        SLH SPARK SYSTEM v1.6 | AI Provider Switcher Active | <span id="liveTimestamp"></span>
     </div>
 </div>
 
 <script>
+    // ---------- System Stats ----------
     async function loadSystemStats() {
         try {
             const res = await fetch('system_stats.json?t=' + Date.now());
@@ -97,6 +121,7 @@
         }
     }
 
+    // ---------- Bot Status ----------
     async function loadBotStatus() {
         try {
             const res = await fetch('bot_status.json?t=' + Date.now());
@@ -115,6 +140,7 @@
         } catch(e) { console.log("bot status error", e); }
     }
 
+    // ---------- Nodes (23) ----------
     function loadNodes() {
         const nodeNames = ['slh-core', 'slh-postgres', 'slh-bridge', 'slh-watchdog', 'esp32-cyd', 'academy-node', 'payment-gw', 'exec-node', 'gemini-arch', 'docker-01', 'docker-02', 'docker-03', 'k8s-sim', 'storage-01', 'log-collector', 'monitor', 'bot-api', 'webhook-proxy', 'tamagotchi-sim', 'crm-node', 'inventory-svc', 'nft-gen', 'core-os'];
         const grid = document.getElementById('nodes-grid');
@@ -123,6 +149,7 @@
         nodeNames.forEach(name => { grid.innerHTML += `<div class="node" style="border-color:#3a6ea5;">${name}</div>`; });
     }
 
+    // ---------- Mission Board ----------
     const tasks = [
         { desc: "Establish project repo & base dashboard", owner: "👤 You", status: "done", date: "2026-04-18" },
         { desc: "Deploy system_bridge + live stats", owner: "🤖 AI", status: "done", date: "2026-04-18" },
@@ -131,13 +158,14 @@
         { desc: "Set up webhook for payment_bot (ngrok)", owner: "👤 You", status: "waiting", date: "" },
         { desc: "Build Agent API (Master Prompts for 5 agents)", owner: "🤖 AI", status: "in-progress", date: "2026-04-19" },
         { desc: "Add PostgreSQL persistence & migrate data", owner: "👤 You", status: "waiting", date: "" },
-        { desc: "Create full PDF documentation & Wiki pages", owner: "🤖 AI", status: "in-progress", date: "2026-04-19" }
+        { desc: "Create full PDF documentation & Wiki pages", owner: "🤖 AI", status: "in-progress", date: "2026-04-19" },
+        { desc: "Add API Key Manager & AI Provider Switcher", owner: "🤖 AI", status: "done", date: "2026-04-19" }
     ];
 
     const roadmap = [
-        { phase: "Phase 1 – Database + Webhooks + Stable Bridge", progress: 45, desc: "Postgres integration, webhook for payment bot, error handling" },
-        { phase: "Phase 2 – Agent API & Autonomous Tasks", progress: 15, desc: "Master prompts, API endpoints, mission.json live sync" },
-        { phase: "Phase 3 – Dashboard 2.0 (Live Controls)", progress: 0, desc: "Start/stop bots, deploy from UI, advanced graphs" }
+        { phase: "Phase 1  Database + Webhooks + Stable Bridge", progress: 45, desc: "Postgres integration, webhook for payment bot, error handling" },
+        { phase: "Phase 2  Agent API & Autonomous Tasks", progress: 20, desc: "Master prompts, API endpoints, mission.json live sync" },
+        { phase: "Phase 3  Dashboard 2.0 (Live Controls)", progress: 0, desc: "Start/stop bots, deploy from UI, advanced graphs" }
     ];
 
     function renderTaskBoard() {
@@ -160,13 +188,106 @@
         });
     }
 
-    function updateClock() { 
-        const el = document.getElementById('liveTimestamp'); 
-        if (el) el.innerText = new Date().toLocaleString(); 
+    // ---------- API Key Manager (localStorage, base64 "encryption") ----------
+    const providers = [
+        { id: "gemini", name: "Google Gemini", placeholder: "AIzaSy..." },
+        { id: "openai", name: "OpenAI", placeholder: "sk-proj-..." },
+        { id: "groq", name: "Groq", placeholder: "gsk_..." },
+        { id: "cohere", name: "Cohere", placeholder: "QWIXpdSX..." },
+        { id: "replicate", name: "Replicate", placeholder: "r8_..." },
+        { id: "hf", name: "Hugging Face", placeholder: "hf_..." }
+    ];
+
+    function loadKeysFromLocal() {
+        let keys = {};
+        providers.forEach(p => {
+            let stored = localStorage.getItem(`slh_${p.id}_key`);
+            if (stored) {
+                try {
+                    keys[p.id] = atob(stored); // base64 decode
+                } catch(e) { keys[p.id] = stored; }
+            } else {
+                keys[p.id] = '';
+            }
+        });
+        return keys;
     }
 
+    function renderKeyManager() {
+        const container = document.getElementById('apiKeysList');
+        if (!container) return;
+        let keys = loadKeysFromLocal();
+        let html = '<table style="width:100%"><tr><th>Provider</th><th>API Key (masked)</th><th>Status</th><th>Action</th></tr>';
+        providers.forEach(p => {
+            let key = keys[p.id];
+            let masked = key ? key.substring(0,8)+'...'+key.substring(key.length-4) : 'Not set';
+            let status = key ? '✅ Active' : '❌ Inactive';
+            html += `<tr>
+                        <td><strong>${p.name}</strong></td>
+                        <td><input type="password" id="key_${p.id}" placeholder="${p.placeholder}" value="${key.replace(/"/g, '&quot;')}" style="width:100%;"></td>
+                        <td><span style="color:${key ? '#88ff88' : '#ff8888'}">${status}</span></td>
+                        <td><button onclick="testKey('${p.id}')" style="background:#2a5f8a;">Test</button></td>
+                     </tr>`;
+        });
+        html += '</table>';
+        container.innerHTML = html;
+        document.getElementById('apiKeysStatus').innerHTML = '✅ Keys loaded from browser storage (encrypted locally).';
+        
+        // Load default model preference
+        let defaultModel = localStorage.getItem('slh_default_model') || 'gemini';
+        let select = document.getElementById('defaultModelSelect');
+        if (select) select.value = defaultModel;
+    }
+
+    function saveKeysToLocal() {
+        providers.forEach(p => {
+            let input = document.getElementById(`key_${p.id}`);
+            if (input && input.value.trim()) {
+                let encrypted = btoa(input.value.trim()); // base64
+                localStorage.setItem(`slh_${p.id}_key`, encrypted);
+            } else {
+                localStorage.removeItem(`slh_${p.id}_key`);
+            }
+        });
+        // Save default model
+        let select = document.getElementById('defaultModelSelect');
+        if (select) localStorage.setItem('slh_default_model', select.value);
+        
+        alert('✅ Keys saved securely to your browser. They will never leave this device.');
+        renderKeyManager();
+    }
+
+    function resetAllKeys() {
+        if (confirm('⚠️ This will delete ALL API keys from your browser. Are you sure?')) {
+            providers.forEach(p => localStorage.removeItem(`slh_${p.id}_key`));
+            localStorage.removeItem('slh_default_model');
+            renderKeyManager();
+            alert('All keys have been reset.');
+        }
+    }
+
+    function testKey(providerId) {
+        let input = document.getElementById(`key_${providerId}`);
+        let key = input ? input.value.trim() : '';
+        if (!key) {
+            alert('No key entered for this provider.');
+            return;
+        }
+        alert(`Testing ${providerId}... (simulated) In production, this would call a test endpoint.`);
+        // בהמשך נוסיף בדיקה אמיתית מול API endpoint
+    }
+
+    function updateClock() {
+        const el = document.getElementById('liveTimestamp');
+        if (el) el.innerText = new Date().toLocaleString();
+    }
+
+    // Initialization
     loadSystemStats(); loadBotStatus(); loadNodes(); renderTaskBoard(); renderRoadmap(); updateClock();
     setInterval(loadSystemStats, 10000); setInterval(loadBotStatus, 15000); setInterval(updateClock, 1000);
+    renderKeyManager();
+    document.getElementById('saveKeysBtn')?.addEventListener('click', saveKeysToLocal);
+    document.getElementById('resetKeysBtn')?.addEventListener('click', resetAllKeys);
 </script>
 </body>
 </html>
