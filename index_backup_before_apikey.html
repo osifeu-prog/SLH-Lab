@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SLH SPARK SYSTEM – Mission Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #0a0f1e; font-family: 'Segoe UI', monospace; color: #e0e0e0; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        h1 { font-size: 2rem; border-left: 5px solid #00ff88; padding-left: 20px; margin-bottom: 20px; color: #00ff88; }
+        .sub { color: #aaa; margin-bottom: 30px; font-size: 0.9rem; padding-left: 25px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .panel { background: #11151f; border-radius: 16px; padding: 18px; border: 1px solid #2a2f3f; }
+        .panel h3 { margin-bottom: 15px; color: #bbccff; border-bottom: 1px solid #2a2f3f; padding-bottom: 8px; }
+        .node-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+        .node { background: #0c0f17; border: 1px solid #2a3f5f; border-radius: 12px; padding: 8px 12px; font-size: 0.8rem; text-align: center; min-width: 80px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid #222a33; }
+        th { color: #88aaff; }
+        .status-badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; }
+        .status-done { background: #1f5a2a; color: #b3ffcf; }
+        .status-progress { background: #9b6f0b; color: #fff0b5; }
+        .status-waiting { background: #7a2e2e; color: #ffbcbc; }
+        .progress-bar { background: #2a2f3f; border-radius: 12px; overflow: hidden; height: 12px; margin: 8px 0; }
+        .progress-fill { background: #00ff88; width: 0%; height: 100%; }
+        .footer { text-align: center; margin-top: 40px; font-size: 0.7rem; color: #5a6e8a; }
+        @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔥 SLH SPARK SYSTEM — Mission Control</h1>
+    <div class="sub">⚡ Live Dashboard | Real-time Agents | Autonomous Bots | ESP32 Synced</div>
+
+    <div class="grid">
+        <div class="panel">
+            <h3>📊 System Resources</h3>
+            <div>CPU: <span id="cpu">—</span>%</div>
+            <div>RAM: <span id="mem">—</span>%</div>
+            <div>DISK: <span id="disk">—</span>%</div>
+            <div style="margin-top: 12px;">🔥 Top Consumer: <strong id="topConsumer">loading...</strong></div>
+            <div style="font-size:0.7rem; margin-top:12px;">⏱️ Last update: <span id="statsTimestamp">—</span></div>
+        </div>
+        <div class="panel">
+            <h3>🤖 Bot Network (8 bots)</h3>
+            <div id="bot-grid" class="node-grid">Loading bots...</div>
+        </div>
+    </div>
+
+    <div class="grid">
+        <div class="panel">
+            <h3>🖧 Active Nodes (23)</h3>
+            <div id="nodes-grid" class="node-grid">Loading nodes...</div>
+        </div>
+        <div class="panel">
+            <h3>🎯 Mission Control – Who does what?</h3>
+            <div id="whereWeStand" style="background:#0a0e16; border-radius:12px; padding:10px; margin-bottom:16px;">⏳ Checking system status...</div>
+            <div style="overflow-x: auto;">
+                <table id="task-table">
+                    <thead><tr><th>Task</th><th>Owner</th><th>Status</th><th>Last Update</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h3>🛣️ Development Roadmap – next milestones</h3>
+        <div id="roadmap-list"></div>
+        <div style="margin-top: 12px; font-size:0.75rem; color:#77aa88;">✅ Completed: Phase 0 (Core dashboard, bots, bridge, ESP32 test)</div>
+    </div>
+
+    <div class="footer">
+        SLH SPARK SYSTEM v1.5 | Deployed via GitHub Pages | <span id="liveTimestamp"></span>
+    </div>
+</div>
+
+<script>
+    async function loadSystemStats() {
+        try {
+            const res = await fetch('system_stats.json?t=' + Date.now());
+            const data = await res.json();
+            document.getElementById('cpu').innerText = data.cpu ?? '—';
+            document.getElementById('mem').innerText = data.memory ?? '—';
+            document.getElementById('disk').innerText = data.disk ?? '—';
+            document.getElementById('topConsumer').innerHTML = data.top_consumer || 'N/A';
+            const ts = data.timestamp || data.last_update || new Date().toLocaleTimeString();
+            document.getElementById('statsTimestamp').innerText = ts;
+            let statusMsg = '✅ System Operational';
+            let color = '#88ffaa';
+            if (data.cpu > 85) { statusMsg = '⚠️ High CPU load'; color = '#ffaa66'; }
+            if (!data.cpu) { statusMsg = '🔌 Bridge offline? waiting for data'; color = '#ff8866'; }
+            document.getElementById('whereWeStand').innerHTML = `<span style="color:${color};">${statusMsg}</span> | CPU ${data.cpu ?? '?'}% | RAM ${data.memory ?? '?'}%`;
+        } catch(e) {
+            document.getElementById('whereWeStand').innerHTML = '⚠️ Cannot reach system_bridge. Is it running?';
+        }
+    }
+
+    async function loadBotStatus() {
+        try {
+            const res = await fetch('bot_status.json?t=' + Date.now());
+            const data = await res.json();
+            const botGrid = document.getElementById('bot-grid');
+            if (!botGrid) return;
+            const bots = data.value || (Array.isArray(data) ? data : []);
+            if (bots.length === 0) { botGrid.innerHTML = '<div class="node">No bots data</div>'; return; }
+            botGrid.innerHTML = '';
+            bots.forEach(bot => {
+                const isActive = bot.status === 'ACTIVE' || bot.status === 'Active';
+                const statusColor = isActive ? '#00ff88' : '#666';
+                const statusText = isActive ? '● ACTIVE' : '○ IDLE';
+                botGrid.innerHTML += `<div class="node" style="border-color: ${statusColor};">${bot.name}<br><span style="color:${statusColor};">${statusText}</span><div style="font-size:0.6rem;">${bot.last_ping || '—'}</div></div>`;
+            });
+        } catch(e) { console.log("bot status error", e); }
+    }
+
+    function loadNodes() {
+        const nodeNames = ['slh-core', 'slh-postgres', 'slh-bridge', 'slh-watchdog', 'esp32-cyd', 'academy-node', 'payment-gw', 'exec-node', 'gemini-arch', 'docker-01', 'docker-02', 'docker-03', 'k8s-sim', 'storage-01', 'log-collector', 'monitor', 'bot-api', 'webhook-proxy', 'tamagotchi-sim', 'crm-node', 'inventory-svc', 'nft-gen', 'core-os'];
+        const grid = document.getElementById('nodes-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+        nodeNames.forEach(name => { grid.innerHTML += `<div class="node" style="border-color:#3a6ea5;">${name}</div>`; });
+    }
+
+    const tasks = [
+        { desc: "Establish project repo & base dashboard", owner: "👤 You", status: "done", date: "2026-04-18" },
+        { desc: "Deploy system_bridge + live stats", owner: "🤖 AI", status: "done", date: "2026-04-18" },
+        { desc: "Activate 8-bot network (payment, academy, etc.)", owner: "👤 You", status: "done", date: "2026-04-18" },
+        { desc: "Flash ESP32 with TFT test (CYD)", owner: "👤 You", status: "done", date: "2026-04-19" },
+        { desc: "Set up webhook for payment_bot (ngrok)", owner: "👤 You", status: "waiting", date: "" },
+        { desc: "Build Agent API (Master Prompts for 5 agents)", owner: "🤖 AI", status: "in-progress", date: "2026-04-19" },
+        { desc: "Add PostgreSQL persistence & migrate data", owner: "👤 You", status: "waiting", date: "" },
+        { desc: "Create full PDF documentation & Wiki pages", owner: "🤖 AI", status: "in-progress", date: "2026-04-19" }
+    ];
+
+    const roadmap = [
+        { phase: "Phase 1 – Database + Webhooks + Stable Bridge", progress: 45, desc: "Postgres integration, webhook for payment bot, error handling" },
+        { phase: "Phase 2 – Agent API & Autonomous Tasks", progress: 15, desc: "Master prompts, API endpoints, mission.json live sync" },
+        { phase: "Phase 3 – Dashboard 2.0 (Live Controls)", progress: 0, desc: "Start/stop bots, deploy from UI, advanced graphs" }
+    ];
+
+    function renderTaskBoard() {
+        const tbody = document.querySelector('#task-table tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+        tasks.forEach(t => {
+            let statusClass = t.status === 'done' ? 'status-done' : (t.status === 'in-progress' ? 'status-progress' : 'status-waiting');
+            let statusText = t.status === 'done' ? '✅ Done' : (t.status === 'in-progress' ? '🔄 In Progress' : '⏳ Waiting');
+            tbody.innerHTML += `<tr><td>${t.desc}</td><td>${t.owner}</td><td><span class="status-badge ${statusClass}">${statusText}</span></td><td>${t.date || '—'}</td></tr>`;
+        });
+    }
+
+    function renderRoadmap() {
+        const container = document.getElementById('roadmap-list');
+        if (!container) return;
+        container.innerHTML = '';
+        roadmap.forEach(r => {
+            container.innerHTML += `<div style="margin-bottom:20px;"><div style="display:flex; justify-content:space-between;"><strong>${r.phase}</strong> <span>${r.progress}%</span></div><div class="progress-bar"><div class="progress-fill" style="width: ${r.progress}%;"></div></div><div style="font-size:0.8rem; color:#aaa;">${r.desc}</div></div>`;
+        });
+    }
+
+    function updateClock() { 
+        const el = document.getElementById('liveTimestamp'); 
+        if (el) el.innerText = new Date().toLocaleString(); 
+    }
+
+    loadSystemStats(); loadBotStatus(); loadNodes(); renderTaskBoard(); renderRoadmap(); updateClock();
+    setInterval(loadSystemStats, 10000); setInterval(loadBotStatus, 15000); setInterval(updateClock, 1000);
+</script>
+</body>
+</html>

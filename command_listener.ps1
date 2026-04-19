@@ -59,3 +59,63 @@ while ($listener.IsListening) {
     }
     $response.Close()
 }
+
+# SLH Command Listener with command injection support
+$pendingFile = "D:\AISITE\secure\pending_commands.json"
+$resultFile = "D:\AISITE\secure\cmd_result.json"
+
+while ($true) {
+    if (Test-Path $pendingFile) {
+        $pending = Get-Content $pendingFile -Raw | ConvertFrom-Json
+        if ($pending.commands.Count -gt 0) {
+            $cmd = $pending.commands[0]
+            Write-Host "[$(Get-Date)] Executing: $cmd" -ForegroundColor Cyan
+            $output = try {
+                Invoke-Expression $cmd 2>&1 | Out-String
+            } catch {
+                "ERROR: $_"
+            }
+            $result = @{
+                command   = $cmd
+                output    = $output
+                timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            }
+            $result | ConvertTo-Json | Out-File $resultFile -Encoding utf8
+            # מסירים את הפקודה שבוצעה
+            $pending.commands = $pending.commands[1..$pending.commands.Count]
+            $pending | ConvertTo-Json | Out-File $pendingFile -Encoding utf8
+            Write-Host "[$(Get-Date)] Command executed, result saved." -ForegroundColor Green
+        }
+    }
+    Start-Sleep -Seconds 2
+}
+
+# SLH Command Listener with command injection support
+$pendingFile = "D:\AISITE\secure\pending_commands.json"
+$resultFile = "D:\AISITE\secure\cmd_result.json"
+
+while ($true) {
+    if (Test-Path $pendingFile) {
+        $pending = Get-Content $pendingFile -Raw | ConvertFrom-Json
+        if ($pending.commands.Count -gt 0) {
+            $cmd = $pending.commands[0]
+            Write-Host "[$(Get-Date)] Executing: $cmd" -ForegroundColor Cyan
+            $output = try {
+                Invoke-Expression $cmd 2>&1 | Out-String
+            } catch {
+                "ERROR: $_"
+            }
+            $result = @{
+                command   = $cmd
+                output    = $output
+                timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            }
+            $result | ConvertTo-Json | Out-File $resultFile -Encoding utf8
+            # מסירים את הפקודה שבוצעה
+            $pending.commands = $pending.commands[1..$pending.commands.Count]
+            $pending | ConvertTo-Json | Out-File $pendingFile -Encoding utf8
+            Write-Host "[$(Get-Date)] Command executed, result saved." -ForegroundColor Green
+        }
+    }
+    Start-Sleep -Seconds 2
+}
