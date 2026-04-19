@@ -7,3 +7,21 @@
 2026-04-18 21:49:09,635 - __main__ - INFO - Payment bot started in polling mode
 2026-04-18 21:49:09,635 - aiogram.dispatcher - INFO - Start polling
 2026-04-18 21:49:10,195 - aiogram.dispatcher - INFO - Run polling for bot @WEWORK_teamviwer_bot id=8741101048 - 'WEWORK'
+2026-04-18 22:51:42,482 - __main__ - INFO - User 8789977826 started bot
+2026-04-18 22:51:42,486 - aiogram.event - INFO - Update id=969084668 is handled. Duration 344 ms by bot id=8741101048
+2026-04-18 22:51:44,343 - __main__ - INFO - Invoice sent to user 8789977826
+2026-04-18 22:51:44,343 - aiogram.event - INFO - Update id=969084669 is handled. Duration 125 ms by bot id=8741101048
+2026-04-18 22:53:54,773 - __main__ - INFO - User 1185887485 started bot
+2026-04-18 22:53:54,773 - aiogram.event - INFO - Update id=969084670 is handled. Duration 235 ms by bot id=8741101048
+2026-04-18 22:58:27,434 - __main__ - INFO - Invoice sent to user 1185887485
+2026-04-18 22:58:27,434 - aiogram.event - INFO - Update id=969084671 is handled. Duration 250 ms by bot id=8741101048
+2026-04-19 11:30:01,587 - __main__ - INFO - User 8789977826 started bot
+2026-04-19 11:30:01,609 - aiogram.event - INFO - Update id=969084672 is handled. Duration 516 ms by bot id=8741101048
+2026-04-19 11:30:03,585 - __main__ - INFO - Invoice sent to user 8789977826
+2026-04-19 11:30:03,587 - aiogram.event - INFO - Update id=969084673 is handled. Duration 171 ms by bot id=8741101048
+2026-04-19 11:42:33,197 - __main__ - INFO - User 224223270 started bot
+2026-04-19 11:42:33,198 - aiogram.event - INFO - Update id=969084674 is handled. Duration 312 ms by bot id=8741101048
+2026-04-19 11:42:37,988 - __main__ - INFO - User 224223270 started bot
+2026-04-19 11:42:37,989 - aiogram.event - INFO - Update id=969084675 is handled. Duration 187 ms by bot id=8741101048
+2026-04-19 11:42:39,250 - __main__ - INFO - Invoice sent to user 224223270
+2026-04-19 11:42:39,251 - aiogram.event - INFO - Update id=969084676 is handled. Duration 157 ms by bot id=8741101048

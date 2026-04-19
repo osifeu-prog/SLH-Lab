@@ -1,0 +1,39 @@
+﻿version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: slh
+      POSTGRES_PASSWORD: slh_pass
+      POSTGRES_DB: slh_payments
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
+  system_bridge:
+    build: .
+    command: python system_bridge.py
+    volumes:
+      - ./system_bridge.py:/app/system_bridge.py
+      - ./system_stats.json:/app/system_stats.json
+    restart: unless-stopped
+
+  payment_bot:
+    build: .
+    command: python payment_bot.py
+    volumes:
+      - ./payment_bot.py:/app/payment_bot.py
+      - ./payments.db:/app/payments.db
+    restart: unless-stopped
+
+  watchdog:
+    build: .
+    command: powershell -File watchdog.ps1
+    volumes:
+      - ./watchdog.ps1:/app/watchdog.ps1
+    restart: unless-stopped
+

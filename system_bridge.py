@@ -6,7 +6,7 @@ import os
 import docker
 
 OUTPUT_PATH = r"D:\AISITE\system_stats.json"
-BOT_TOKEN = "YOUR_BOT_TOKEN"
+BOT_TOKEN = "8741101048:AAH5KszG_t1ccT4ejzCrlxRzVYma7XRU3iY"
 CHAT_ID = "YOUR_CHAT_ID"
 NODE_THRESHOLD = 23
 
@@ -87,3 +87,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
