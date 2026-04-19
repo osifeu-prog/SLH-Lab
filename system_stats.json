@@ -1,10 +1,10 @@
 {
   "status": "online",
-  "last_update": "2026-04-19 12:47:31",
-  "cpu": 99.8,
-  "memory": 72.4,
+  "last_update": "2026-04-19 14:45:30",
+  "cpu": 35.8,
+  "memory": 69.0,
   "disk": 7.6,
-  "top_consumer": "slh-redis",
+  "top_consumer": "slh-fun",
   "docker_nodes": {
     "total": 27,
     "active": 23

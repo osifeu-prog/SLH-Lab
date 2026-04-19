@@ -33,3 +33,4 @@
 2026-04-19 12:00:30,444 - aiogram.dispatcher - ERROR - Failed to fetch updates - TelegramConflictError: Telegram server says - Conflict: terminated by setWebhook request
 2026-04-19 12:00:30,444 - aiogram.dispatcher - WARNING - Sleep for 1.000000 seconds and try again... (tryings = 0, bot id = 8741101048)
 2026-04-19 12:00:41,523 - aiogram.dispatcher - INFO - Connection established (tryings = 1, bot id = 8741101048)
+2026-04-19 14:46:09,049 - aiogram.dispatcher - INFO - Polling stopped for bot @WEWORK_teamviwer_bot id=8741101048 - 'WEWORK'
