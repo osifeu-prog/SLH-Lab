@@ -1,0 +1,206 @@
+﻿<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>SLH | COMMAND CENTER</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root { --neon: #00f2ff; --bg: #0a0a0a; --card: #151515; }
+        body { background: var(--bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; height: 100vh; }
+        nav { width: 220px; background: #000; border-left: 1px solid #333; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        nav a { color: #888; text-decoration: none; padding: 12px; border-radius: 5px; transition: 0.3s; border: 1px solid transparent; }
+        nav a:hover, nav a.active { background: rgba(0, 242, 255, 0.1); color: var(--neon); border-color: var(--neon); }
+        main { flex: 1; padding: 30px; overflow-y: auto; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+        .node { background: var(--card); border: 1px solid #222; padding: 10px; text-align: center; font-size: 0.7rem; border-radius: 4px; border-top: 2px solid #333; }
+        .status-on { color: #00ff88; font-weight: bold; }
+        .panel { background: var(--card); border: 1px solid #333; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        #log-container { font-family: 'Courier New', monospace; font-size: 0.85rem; height: 180px; overflow: hidden; color: #00f2ff; line-height: 1.4; }
+        .bot-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-top: 10px; }
+        button { background: #00f2ff; color: #000; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        input { flex:1; padding: 8px; background:#222; color:white; border:1px solid #444; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <nav>
+        <h2 style="color:var(--neon); letter-spacing: 2px;">SLH OS</h2>
+        <a href="index.html" class="active">📊 Dashboard</a>
+        <a href="agents.html">🤖 Agents Matrix</a>
+        <a href="prompts.html">📜 Master Prompts</a>
+        <a href="tasks.html">✅ Mission Board</a>
+        <hr style="border: 0; border-top: 1px solid #222; width: 100%;">
+        <a href="https://github.com/osifeu-prog/SLH-Lab" target="_blank">🛠 GitHub Repo</a>
+        <a href="wiki/index.html" target="_blank">📚 Wiki</a>
+    </nav>
+    <main>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h1 style="margin:0;">SYSTEM OVERVIEW</h1>
+            <div id="clock" style="color:var(--neon); font-family:monospace; font-size:1.2rem;"></div>
+        </div>
+        <div class="grid" id="nodeGrid"></div>
+        
+        <!-- Bot Network -->
+        <div class="panel">
+            <h3 style="color:var(--neon);">🤖 Bot Network (8 Bots)</h3>
+            <div id="bot-grid" class="bot-grid"></div>
+        </div>
+        
+        <div style="display: flex; gap: 20px;">
+            <div class="panel" style="flex: 2;">
+                <h3 style="margin-top:0; color:var(--neon);">Live System Logs</h3>
+                <div id="log-container"></div>
+            </div>
+            <div class="panel" style="flex: 1; text-align:center;">
+                <h3 style="margin-top:0;">Resource Load</h3>
+                <canvas id="loadChart"></canvas>
+                <div id="systemStats" style="margin-top: 15px; font-size: 0.9rem; text-align: center; background: #00000088; padding: 8px; border-radius: 8px;"></div>
+            </div>
+        </div>
+        
+        <!-- Command Terminal Panel -->
+        <div class="panel">
+            <h3 style="color:var(--neon);">🖥️ Command Terminal (Local)</h3>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" id="cmdInput" placeholder="הקלד פקודה... (למשל: systeminfo, docker ps, dir)">
+                <button id="sendCmd">🚀 הרץ</button>
+            </div>
+            <div id="cmdResult" style="background:#000; padding: 8px; font-family: monospace; font-size: 0.8rem; max-height: 200px; overflow-y: auto; color: #0f0; border-radius: 4px;">תוצאה תופיע כאן...</div>
+        </div>
+        
+        <!-- History -->
+        <div class="panel">
+            <h3>📜 תיעוד התהליך המלא</h3>
+            <table style="width:100%; border-collapse: collapse;">
+                <thead><tr><th>תאריך</th><th>פעולה</th><th>סטטוס</th></tr></thead>
+                <tbody id="historyTable"></tbody>
+            </table>
+        </div>
+    </main>
+    <script>
+        // 23 Nodes
+        const grid = document.getElementById('nodeGrid');
+        for(let i=1; i<=23; i++) {
+            grid.innerHTML += `<div class="node">NODE-` + (i<10?'0'+i:i) + `<br><span class="status-on">● ONLINE</span></div>`;
+        }
+        // Live Logs
+        const logs = ["Initializing Docker...", "Syncing SLH-Lab", "Agent Gemini: Active", "ESP32: Connected", "Node-07: Optimized", "Security Scan: Clear"];
+        const logBox = document.getElementById('log-container');
+        setInterval(() => {
+            const p = document.createElement('div');
+            p.innerHTML = `<span style="color:#666">[${new Date().toLocaleTimeString()}]</span> > ` + logs[Math.floor(Math.random()*logs.length)];
+            logBox.prepend(p);
+            if(logBox.childNodes.length > 10) logBox.lastChild.remove();
+        }, 2500);
+        // Clock
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleString('he-IL'); }, 1000);
+        
+        // System Stats from system_stats.json
+        let resourceChart = null;
+        async function fetchSystemStats() {
+            try {
+                const response = await fetch('system_stats.json?t=' + Date.now());
+                const data = await response.json();
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: ${data.disk}% &nbsp; | &nbsp; 🧠 זיכרון: ${data.memory}% &nbsp; | &nbsp; 🖥️ CPU: ${data.cpu}%<br><span style="font-size:0.7rem;">עודכן: ${data.timestamp}</span>`;
+                if (resourceChart) {
+                    resourceChart.data.datasets[0].data = [data.cpu, 100 - data.cpu];
+                    resourceChart.update();
+                } else {
+                    const ctx = document.getElementById('loadChart').getContext('2d');
+                    resourceChart = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: { datasets: [{ data: [data.cpu, 100 - data.cpu], backgroundColor: ['#00f2ff', '#222'], borderWidth: 0 }] },
+                        options: { cutout: '80%', plugins: { legend: { position: 'bottom' } } }
+                    });
+                }
+            } catch(e) {
+                document.getElementById('systemStats').innerHTML = `💾 דיסק: --% &nbsp; | &nbsp; 🧠 זיכרון: --% &nbsp; | &nbsp; 🖥️ CPU: --%<br><span style="font-size:0.7rem;">ממתין ל‑system_bridge.py...</span>`;
+            }
+        }
+        setInterval(fetchSystemStats, 3000);
+        fetchSystemStats();
+        
+        // Bot Status from bot_status.json
+        function loadBotStatus() {
+            fetch('bot_status.json?t=' + Date.now())
+                .then(response => response.json())
+                .then(data => {
+                    const botGrid = document.querySelector('#bot-grid');
+                    if (botGrid) {
+                        botGrid.innerHTML = '';
+                        for (const [name, status] of Object.entries(data)) {
+                            if (name !== 'last_check') {
+                                const statusColor = status === 'Active' ? '#00ff88' : '#666';
+                                const statusText = status === 'Active' ? '● ACTIVE' : '○ IDLE';
+                                botGrid.innerHTML += `
+                                    <div class="node" style="border-color: ${statusColor};">
+                                        ${name}<br>
+                                        <span style="color:${statusColor};">${statusText}</span>
+                                        <div style="font-size:0.6rem;">${data.last_check || 'now'}</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    }
+                })
+                .catch(err => console.log("No bot status yet", err));
+        }
+        setInterval(loadBotStatus, 5000);
+        loadBotStatus();
+        
+        // Command Terminal
+        const sendBtn = document.getElementById('sendCmd');
+        const cmdInput = document.getElementById('cmdInput');
+        const cmdResult = document.getElementById('cmdResult');
+        async function runCommand(cmd) {
+            cmdResult.innerHTML = "⏳ שולח פקודה...";
+            try {
+                const response = await fetch('http://localhost:8080/command', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ command: cmd })
+                });
+                const data = await response.json();
+                cmdResult.innerHTML = `<pre style="margin:0; white-space:pre-wrap;">${data.output || "⚠️ אין פלט"}</pre>`;
+            } catch (err) {
+                cmdResult.innerHTML = `❌ שגיאה: ${err.message}<br>ודא ש‑command_listener.ps1 רץ.`;
+            }
+        }
+        sendBtn.addEventListener('click', () => { const cmd = cmdInput.value.trim(); if (cmd) runCommand(cmd); });
+        cmdInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendBtn.click(); });
+        
+                // Update Top Consumer from system_stats.json
+        async function updateTopConsumer() {
+            try {
+                const response = await fetch('system_stats.json?t=' + Date.now());
+                const data = await response.json();
+                const top = data.top_consumer || 'N/A';
+                document.getElementById('topConsumer').innerHTML = `🔥 <strong>${top}</strong> צורך הכי הרבה CPU`;
+            } catch(e) {
+                document.getElementById('topConsumer').innerHTML = '⏳ ממתין לנתונים...';
+            }
+        }
+        setInterval(updateTopConsumer, 5000);
+        updateTopConsumer();
+        // History
+        const historyData = [
+            { date: "2026-04-18 20:06", action: "יצירת index.html בסיסי", status: "✅" },
+            { date: "2026-04-18 20:10", action: "יצירת repo SLH-Lab ו-push ראשון", status: "✅" },
+            { date: "2026-04-18 20:45", action: "הוספת Dashboard עם 23 Nodes, לוגים, גרף", status: "✅" },
+            { date: "2026-04-18 21:00", action: "הוספת דפי Agents ו-Prompts", status: "✅" },
+            { date: "2026-04-18 21:30", action: "הוספת Mission Board ו-Watchdog", status: "✅" },
+            { date: "2026-04-18 20:44", action: "חיבור system_bridge.py (נתונים אמיתיים)", status: "✅" }
+        ];
+        const tbody = document.getElementById('historyTable');
+        historyData.forEach(item => {
+            let row = tbody.insertRow();
+            row.insertCell(0).innerText = item.date;
+            row.insertCell(1).innerText = item.action;
+            row.insertCell(2).innerHTML = item.status;
+        });
+    </script>
+</body>
+</html>
+
+
+
+

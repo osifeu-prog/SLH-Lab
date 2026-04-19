@@ -1,8 +1,8 @@
 {
   "status": "online",
-  "last_update": "2026-04-19 12:03:20",
-  "cpu": 38.1,
-  "memory": 76.5,
+  "last_update": "2026-04-19 12:09:00",
+  "cpu": 46.7,
+  "memory": 76.2,
   "disk": 7.6,
   "top_consumer": "slh-redis",
   "docker_nodes": {
