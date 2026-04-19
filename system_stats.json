@@ -1,8 +1,8 @@
 {
   "status": "online",
-  "last_update": "2026-04-18 21:45:51",
-  "cpu": 12.7,
-  "memory": 71.6,
+  "last_update": "2026-04-19 11:47:16",
+  "cpu": 39.3,
+  "memory": 81.5,
   "disk": 7.6,
   "top_consumer": "slh-postgres",
   "docker_nodes": {
