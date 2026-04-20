@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SLH Control Panel · Live</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0a0f1e; font-family:'Segoe UI', sans-serif; color:#e0e0e0; padding:20px; min-height:100vh; }
+  .container { max-width:1400px; margin:0 auto; }
+  h1 { color:#00ff88; font-size:1.8rem; border-left:5px solid #00ff88; padding-right:20px; padding-left:20px; margin-bottom:8px; }
+  .sub { color:#888; font-size:0.85rem; margin-bottom:20px; padding-right:25px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(380px, 1fr)); gap:18px; margin-bottom:18px; }
+  .panel { background:#11151f; border-radius:14px; padding:16px; border:1px solid #2a2f3f; }
+  .panel h3 { color:#bbccff; border-bottom:1px solid #2a2f3f; padding-bottom:8px; margin-bottom:12px; font-size:1rem; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th, td { text-align:right; padding:7px 5px; border-bottom:1px solid #1e2330; }
+  th { color:#88aaff; font-weight:600; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-left:6px; }
+  .up { background:#00ff88; box-shadow:0 0 6px #00ff88; }
+  .down { background:#ff4455; box-shadow:0 0 6px #ff4455; }
+  .warn { background:#ffaa33; box-shadow:0 0 6px #ffaa33; }
+  button { background:#1f5a2a; border:none; color:white; padding:8px 14px; border-radius:8px; cursor:pointer; font-size:0.85rem; margin:3px; transition:opacity 0.2s; }
+  button:hover { opacity:0.8; }
+  button.danger { background:#7a2e2e; }
+  button.warn { background:#8a6020; }
+  button.info { background:#1f4a7a; }
+  input, textarea { background:#0a0e16; border:1px solid #2a3f5f; color:white; padding:7px; border-radius:6px; width:100%; font-family:monospace; }
+  .kv { display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid #1a1f2e; font-size:0.85rem; }
+  .kv:last-child { border-bottom:none; }
+  .kv span:first-child { color:#88aaff; }
+  .kv span:last-child { color:#e0e0e0; font-family:monospace; }
+  .fatigue-green { color:#00ff88; }
+  .fatigue-orange { color:#ffaa33; }
+  .fatigue-red { color:#ff4455; }
+  .log { background:#0a0e16; border-radius:6px; padding:8px; font-family:monospace; font-size:0.75rem; max-height:150px; overflow-y:auto; white-space:pre-wrap; color:#b0b0b0; }
+  .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#1f5a2a; color:white; padding:12px 24px; border-radius:8px; display:none; z-index:1000; box-shadow:0 4px 20px rgba(0,0,0,0.5); }
+  .footer { text-align:center; color:#5a6e8a; font-size:0.75rem; margin-top:20px; }
+  .btn-row { display:flex; flex-wrap:wrap; gap:4px; margin-top:8px; }
+  h3 .count { float:left; background:#1f4a7a; color:white; padding:1px 8px; border-radius:10px; font-size:0.7rem; font-weight:normal; margin-top:2px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>⚡ SLH Control Panel</h1>
+  <div class="sub">Live · CORS-safe · Direct to local services · <span id="ts">—</span></div>
+
+  <!-- Row 1: Top bar services + ESP -->
+  <div class="grid">
+    <div class="panel">
+      <h3>🔌 שירותים (localhost)</h3>
+      <div id="services-top">טוען...</div>
+      <div class="btn-row" style="margin-top:12px;">
+        <button class="info"  onclick="sysAction('status')">📡 Refresh</button>
+        <button class="warn"  onclick="sysAction('recover')">♻️ Recover All</button>
+        <button           onclick="sysAction('start')">▶️ Start Master</button>
+        <button class="danger" onclick="sysAction('stop')">⏹ Stop Master</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>📡 ESP32-CYD <span class="count" id="esp-age">—</span></h3>
+      <div id="esp-state">טוען...</div>
+      <div class="btn-row" style="margin-top:10px;">
+        <button class="danger" onclick="espCmd('LED_RED')">🔴 LED RED</button>
+        <button class="info"   onclick="espCmd('LED_GREEN')">🟢 LED GREEN</button>
+        <button class="info"   onclick="espCmd('LED_BLUE')">🔵 LED BLUE</button>
+        <button class="warn"   onclick="espCmd('REBOOT')">♻️ Reboot</button>
+        <button                onclick="espCmd('PING')">📡 Ping</button>
+        <button class="info"   onclick="clearEspCmd()">🧹 Clear cmd</button>
+      </div>
+      <div style="margin-top:8px;">
+        <input id="custom-cmd" placeholder="פקודה מותאמת...">
+        <div class="btn-row">
+          <button onclick="espCmd(document.getElementById('custom-cmd').value)">⚡ Send Custom</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Runtime services (from master_controller) + Agent Fatigue -->
+  <div class="grid">
+    <div class="panel">
+      <h3>🖥 Runtime Services (master_controller) <span class="count" id="rt-count">—</span></h3>
+      <div id="runtime-services">טוען...</div>
+    </div>
+
+    <div class="panel">
+      <h3>😴 Agent Fatigue</h3>
+      <div id="fatigue-table">טוען...</div>
+      <div style="font-size:0.7rem; color:#888; margin-top:8px;">
+        Score = exit_code × 50 + (pid absent × 30) + (uptime bucket). ירוק &lt;30 · כתום 30-60 · אדום &gt;60
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 3: Action log -->
+  <div class="panel">
+    <h3>📋 Action Log</h3>
+    <div id="log" class="log">[ready]</div>
+  </div>
+
+  <div class="footer">
+    SLH Control Panel · Served from panel.py on :8001 ·
+    תדאג לוודא ש-control_api (:5050) ו-esp_bridge (:5002) רצים
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+  // ===== helpers =====
+  const $ = id => document.getElementById(id);
+  const logLine = (msg) => {
+    const el = $('log');
+    const t = new Date().toLocaleTimeString('he-IL');
+    el.textContent = `[${t}] ${msg}\n` + el.textContent;
+    if (el.textContent.length > 4000) el.textContent = el.textContent.slice(0, 4000);
+  };
+  const toast = (msg, bg='#1f5a2a') => {
+    const el = $('toast');
+    el.textContent = msg;
+    el.style.background = bg;
+    el.style.display = 'block';
+    setTimeout(()=> el.style.display='none', 2500);
+  };
+  const dotFor = (up) => `<span class="dot ${up?'up':'down'}"></span>`;
+  const fmtTime = iso => {
+    if (!iso) return '—';
+    try {
+      const d = new Date(iso);
+      const diffSec = Math.floor((Date.now() - d.getTime())/1000);
+      if (diffSec < 60) return `${diffSec}s ago`;
+      if (diffSec < 3600) return `${Math.floor(diffSec/60)}m ago`;
+      return `${Math.floor(diffSec/3600)}h ago`;
+    } catch { return iso; }
+  };
+  const fmtUptime = sec => {
+    if (!sec && sec !== 0) return '—';
+    if (sec < 60) return `${sec}s`;
+    if (sec < 3600) return `${Math.floor(sec/60)}m ${sec%60}s`;
+    return `${Math.floor(sec/3600)}h ${Math.floor((sec%3600)/60)}m`;
+  };
+
+  // ===== combined summary refresh =====
+  async function refresh() {
+    try {
+      const res = await fetch('/api/panel/summary');
+      const data = await res.json();
+      renderServices(data.services || {});
+      renderESP(data.esp);
+      renderRuntime(data.runtime);
+      renderFatigue(data.runtime);
+      $('ts').textContent = new Date().toLocaleString('he-IL');
+    } catch (e) {
+      logLine(`❌ summary fetch failed: ${e.message}`);
+    }
+  }
+
+  // ===== Services top bar =====
+  function renderServices(services) {
+    const order = ['control_api', 'esp_bridge', 'system_bridge'];
+    let html = '';
+    for (const name of order) {
+      const s = services[name] || {up:false, http:0};
+      html += `<div class="kv">
+        <span>${dotFor(s.up)} ${name}</span>
+        <span>${s.up ? 'UP' : 'DOWN'} · http=${s.http}</span>
+      </div>`;
+    }
+    $('services-top').innerHTML = html;
+  }
+
+  // ===== ESP state =====
+  function renderESP(esp) {
+    if (!esp) {
+      $('esp-state').innerHTML = '<div style="color:#ff6666;">⚠ אין קובץ esp_status.json</div>';
+      $('esp-age').textContent = '—';
+      return;
+    }
+    const ageText = fmtTime(esp.received_at);
+    $('esp-age').textContent = ageText;
+    const isRecent = esp.received_at && (Date.now() - new Date(esp.received_at).getTime()) < 60000;
+    const connected = esp.status === 'CONNECTED' && isRecent;
+    $('esp-state').innerHTML = `
+      <div class="kv"><span>Status</span><span>${dotFor(connected)} ${esp.status || '—'}</span></div>
+      <div class="kv"><span>Device</span><span>${esp.device || '—'}</span></div>
+      <div class="kv"><span>Firmware</span><span>${esp.fw || '—'}</span></div>
+      <div class="kv"><span>IP</span><span>${esp.ip || '—'}</span></div>
+      <div class="kv"><span>SSID</span><span>${esp.ssid || '—'}</span></div>
+      <div class="kv"><span>RSSI</span><span>${esp.rssi || 0} dBm</span></div>
+      <div class="kv"><span>Uptime</span><span>${fmtUptime(esp.uptime_seconds)}</span></div>
+      <div class="kv"><span>Free heap</span><span>${esp.free_heap || 0} KB</span></div>
+      <div class="kv"><span>Last btn</span><span>${esp.last_button || '—'}</span></div>
+      <div class="kv"><span>Last seen</span><span>${ageText}</span></div>
+    `;
+  }
+
+  // ===== Runtime services (from master_controller) =====
+  function renderRuntime(rt) {
+    if (!rt || rt.error) {
+      $('runtime-services').innerHTML = `<div style="color:#ff6666;">⚠ master_controller לא רץ / runtime_status.json לא קיים<br><small>${rt?.error || ''}</small></div>`;
+      $('rt-count').textContent = '0';
+      return;
+    }
+    const services = rt.services || {};
+    const names = Object.keys(services);
+    $('rt-count').textContent = names.length;
+    if (!names.length) {
+      $('runtime-services').innerHTML = '<div style="color:#888;">רשימת שירותים ריקה</div>';
+      return;
+    }
+    let html = '<table><tr><th>Service</th><th>PID</th><th>Status</th><th>Exit</th><th>Uptime</th></tr>';
+    for (const name of names) {
+      const s = services[name] || {};
+      const running = !!s.pid;
+      html += `<tr>
+        <td>${dotFor(running)} ${name}</td>
+        <td>${s.pid || '—'}</td>
+        <td>${running ? 'RUNNING' : 'STOPPED'}</td>
+        <td>${s.last_exit_code ?? '—'}</td>
+        <td>${s.started_at ? fmtTime(s.started_at) : '—'}</td>
+      </tr>`;
+    }
+    html += '</table>';
+    $('runtime-services').innerHTML = html;
+  }
+
+  // ===== Agent Fatigue =====
+  function renderFatigue(rt) {
+    if (!rt || rt.error || !rt.services) {
+      $('fatigue-table').innerHTML = '<div style="color:#888;">אין נתוני runtime</div>';
+      return;
+    }
+    const services = rt.services;
+    let html = '<table><tr><th>Agent</th><th>PID</th><th>Exit</th><th>Fatigue</th></tr>';
+    for (const [name, s] of Object.entries(services)) {
+      let score = 0;
+      if (s.last_exit_code) score += 50;
+      if (!s.pid) score += 30;
+      const cls = score < 30 ? 'fatigue-green' : (score < 60 ? 'fatigue-orange' : 'fatigue-red');
+      html += `<tr>
+        <td>${name}</td>
+        <td>${s.pid || '—'}</td>
+        <td>${s.last_exit_code ?? '—'}</td>
+        <td class="${cls}">${score}%</td>
+      </tr>`;
+    }
+    html += '</table>';
+    $('fatigue-table').innerHTML = html;
+  }
+
+  // ===== Actions =====
+  async function sysAction(kind) {
+    if (kind === 'status') { await refresh(); toast('רענון הושלם'); return; }
+    const endpoint = {
+      'recover': '/api/system/recover',
+      'start':   '/api/system/start',
+      'stop':    '/api/system/stop',
+    }[kind];
+    if (!endpoint) return;
+    logLine(`→ POST ${endpoint}`);
+    try {
+      const res = await fetch(endpoint, {method:'POST'});
+      const data = await res.json();
+      logLine(`✓ ${endpoint} → ${JSON.stringify(data)}`);
+      toast(data.message || `${kind} הופעל`);
+      setTimeout(refresh, 1500);
+    } catch (e) {
+      logLine(`✗ ${endpoint} → ${e.message}`);
+      toast(`שגיאה: ${e.message}`, '#7a2e2e');
+    }
+  }
+
+  async function espCmd(command) {
+    if (!command) { toast('פקודה ריקה', '#7a2e2e'); return; }
+    logLine(`→ ESP cmd: ${command}`);
+    try {
+      const res = await fetch('/api/esp/command', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({command})
+      });
+      const data = await res.json();
+      logLine(`✓ ESP ← ${JSON.stringify(data)}`);
+      toast(`ESP: ${command}`);
+    } catch (e) {
+      logLine(`✗ ESP cmd failed: ${e.message}`);
+      toast(`שגיאה: ${e.message}`, '#7a2e2e');
+    }
+  }
+
+  async function clearEspCmd() {
+    logLine('→ ESP clear');
+    try {
+      const res = await fetch('/api/esp/command/clear', {method:'POST'});
+      const data = await res.json();
+      logLine(`✓ cleared ← ${JSON.stringify(data)}`);
+      toast('פקודה נוקתה');
+    } catch (e) {
+      logLine(`✗ clear failed: ${e.message}`);
+    }
+  }
+
+  // ===== init =====
+  refresh();
+  setInterval(refresh, 5000);
+  logLine('Control Panel loaded.');
+</script>
+</body>
+</html>
